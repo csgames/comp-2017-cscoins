@@ -1,3 +1,8 @@
+# Important!
+
+This document might still be updated until the beginning of the CS Games 2017. We recommend the interested parties to watch the [https://github.com/csgames/compe2017](https://github.com/csgames/compe2017) repository to get notified as soon as a new change is introduced. For any issues, bug or needed clarification, please open an issue in the Github project.
+
+
 # CSCoins Documentation
 
 ## Summary
@@ -32,7 +37,7 @@ Along with the challenge name, the Central Authority server might also specify a
 Once the miner has the challenge parameters, it can start generating the challenge dataset. It does so by generating `nb_elements` 64 bits unsigned integer with the Pseudo Random Number Generator. The seed state used by the PRNG is the first 8 bytes of the SHA256 Hash of the concatenation of the last solution hash (In stringified hex) and a given nonce (`SHA256(HEX(LastSolutionHash) | Nonce)[:8]`).
 
 Once the challenge dataset is generated, the miner has to solve the challenge. In the case of the sorted list challenge, it must sort the elements to generate a solution string. To build that string, the miner has to put all values of the list in sorted order, the number are then converted to their string represented in base 10 and concatenated together.
-**Example**: Given a list of 5 numbers, `[9, 4, 5, 9, 2]`. The sorted list solution string is: `"24599"`. 
+**Example**: Given a list of 5 numbers, `[9, 4, 5, 9, 2]`. The sorted list solution string is: `"24599"`.
 
 Finally, the solution string is hashed with SHA256 and the result compared to the prefix provided by the Central Authority server. If it does match, the miner can submit the nonce used to generate the challenge and get awarded a CSCoin!
 
@@ -55,11 +60,11 @@ The miner start by requesting the current challenge properties from the the Cent
 
 This is the first challenge of the blockchain, so the last solution hash is `"0..0000"`. We can try our first mining attemps with a nonce set to `"0"`.
 
-So we hash `"00000000000000000000000000000000000000000000000000000000000000000"` (`'0'` x 65). Which give us the hex digest: `e531ef0f962409170917abf9de3287afec23dd1c42c9e1fea66c5feab99e8f7c`. 
+So we hash `"00000000000000000000000000000000000000000000000000000000000000000"` (`'0'` x 65). Which give us the hex digest: `e531ef0f962409170917abf9de3287afec23dd1c42c9e1fea66c5feab99e8f7c`.
 
-We use the last 8 bytes to generate an integer, this integer will be our seed number. `"\xe5\x31\xef\x0f\96\x24\x09\x17"` or `0x170924960fef31e5` as an unsigned 64 bits integer. 
+We use the last 8 bytes to generate an integer, this integer will be our seed number. `"\xe5\x31\xef\x0f\96\x24\x09\x17"` or `0x170924960fef31e5` as an unsigned 64 bits integer.
 
-With the seeded Mersenne Twister PRNG, generate 20 unsigned 64 bits random integer: 
+With the seeded Mersenne Twister PRNG, generate 20 unsigned 64 bits random integer:
 ```json
 [187434852114612846, 10837196899528407950, 13231065775368684808, 4942314897761499926, 17028306872668076666, 6479076410078001012, 1361812409744256450, 3291217005668754618, 4966164133636131008, 7642938895213376385, 2143391747588726128, 10354190044461362030, 7773684818964863771, 10794580392141786114, 16492712020482564264, 9905729874405870466, 5103580236542799915, 15262620284228700467, 4872192301904809974, 2466619936935862033]
 ```
@@ -69,7 +74,7 @@ We order them :
 [187434852114612846, 1361812409744256450, 2143391747588726128, 2466619936935862033, 3291217005668754618, 4872192301904809974, 4942314897761499926, 4966164133636131008, 5103580236542799915, 6479076410078001012, 7642938895213376385, 7773684818964863771, 9905729874405870466, 10354190044461362030, 10794580392141786114, 10837196899528407950, 13231065775368684808, 15262620284228700467, 16492712020482564264, 17028306872668076666]
 ```
 
-We build the solution string by concatenating those numbers together : 
+We build the solution string by concatenating those numbers together :
 ```json
 "18743485211461284613618124097442564502143391747588726128246661993693586203332912170056687546184872192301904809974494231489776149992649661641336361310085103580236542799915647907641007800101276429388952133763857773684818964863771990572987440587046610354190044461362030107945803921417861141083719689952840795013231065775368684808152626202842287004671649271202048256426417028306872668076666"
 ```
@@ -82,9 +87,9 @@ Our new random nonce is `"96436717027"`.
 
 So we hash `"000000000000000000000000000000000000000000000000000000000000000096436717027"`. Which give us: `b998963f3add4b84a5bb2b28bff28e2c556cb860e73d110679b5f9c2ac65bad4`
 
-`\xb9\x98\x96\x3f\x3a\xdd\x4b\x84` or `0x844bdd3a3f9698b9` as 64 bits integer. 
+`\xb9\x98\x96\x3f\x3a\xdd\x4b\x84` or `0x844bdd3a3f9698b9` as 64 bits integer.
 
-Our new numbers are : 
+Our new numbers are :
 ```json
 13916525834144929239, 14267992374683960415, 17447482481089031970, 17757524129420908411, 3262888185675309556, 4651484254165491713, 14892328834357397553, 642435218906306919, 12375157785219615227, 17110841558370943827, 17014653408604181717, 16941248359459129302, 448482909903223685, 13547565333399307760, 7472403995188135213, 7093177824549920619, 4562417252290276756, 17541524771507166271, 10898898378669729391, 9285048143772460569
 ```
@@ -121,9 +126,9 @@ A new challenge is then generated. The miner fetch the updated information from 
 ```
 
 
-This is the second challenge, so the miner now have the previous hash to seed the PRNG. We hash the last solution and a random nonce to seed the PRNG: `SHA256("94f983bf4d2e06610db4f15bfc6237f5d9e5f79a2e9502e52cd0ddfca905b163" + "248565")`. This give use the digest: `83d51291b621b0a96c6a871256c911ca431b1ff24102f069951659457cb0d8fb`. 
+This is the second challenge, so the miner now have the previous hash to seed the PRNG. We hash the last solution and a random nonce to seed the PRNG: `SHA256("94f983bf4d2e06610db4f15bfc6237f5d9e5f79a2e9502e52cd0ddfca905b163" + "248565")`. This give use the digest: `83d51291b621b0a96c6a871256c911ca431b1ff24102f069951659457cb0d8fb`.
 
-We use the first 8 bytes to generate an 64 bits unsigned integer, this integer will be our seed number: `\x83\xd5\x12\x91\xb6\x21\xb0\xa9` or `0xa9b021b69112d583`. 
+We use the first 8 bytes to generate an 64 bits unsigned integer, this integer will be our seed number: `\x83\xd5\x12\x91\xb6\x21\xb0\xa9` or `0xa9b021b69112d583`.
 
 We use the seeded PRNG to generate 20 random 64 bits unsigned integers:
 
@@ -131,7 +136,7 @@ We use the seeded PRNG to generate 20 random 64 bits unsigned integers:
 7554992472722769382, 8495646299498670407, 16283171823286969215, 14362607901913361150, 6692862674045639924, 9015192917032127462, 327830662700023863, 9371480197312631464, 16474393573432639799, 11349000119560803050, 3722572335198690747, 11617180555990659053, 14400604751394908311, 16917897951851071986, 4035298408703112487, 5375153024761395986, 1544660713920769741, 16852903019784931493, 16173382640596610454, 17545493636135106882
 ```
 
-We order them: 
+We order them:
 ```json
 327830662700023863, 1544660713920769741, 3722572335198690747, 4035298408703112487, 5375153024761395986, 6692862674045639924, 7554992472722769382, 8495646299498670407, 9015192917032127462, 9371480197312631464, 11349000119560803050, 11617180555990659053, 14362607901913361150, 14400604751394908311, 16173382640596610454, 16283171823286969215, 16474393573432639799, 16852903019784931493, 16917897951851071986, 17545493636135106882
 ```
@@ -141,7 +146,7 @@ We build the solution string by concatenating those numbers together :
 32783066270002386315446607139207697413722572335198690747403529840870311248753751530247613959866692862674045639924755499247272276938284956462994986704079015192917032127462937148019731263146411349000119560803050116171805559906590531436260790191336115014400604751394908311161733826405966104541628317182328696921516474393573432639799168529030197849314931691789795185107198617545493636135106882
 ```
 
-We hash the solution: `7d5fb906c70df5d43275e30bb044f64fbd5b4c2a2c8a92597700c7d1709a202b`. 
+We hash the solution: `7d5fb906c70df5d43275e30bb044f64fbd5b4c2a2c8a92597700c7d1709a202b`.
 
 Not matching the `9098` prefix sent by the Central Authority server...
 
@@ -199,7 +204,7 @@ We are using RSA digital signature protocol according to PKCS#1 v1.5. Some messa
 
 ### Communication with the Central Authority
 
-The Central Authority Server use the [WebSocket protocol](https://en.wikipedia.org/wiki/WebSocket) to communicate. The server URI is [wss://cscoins.2017.csgames.org:8989/client](wss://cscoins.2017.csgames.org:8989/client). Once a client is connected, the server will be waiting for any incoming commands. All data sent or received are serialized in JSON. 
+The Central Authority Server use the [WebSocket protocol](https://en.wikipedia.org/wiki/WebSocket) to communicate. The server URI is [wss://cscoins.2017.csgames.org:8989/client](wss://cscoins.2017.csgames.org:8989/client). Once a client is connected, the server will be waiting for any incoming commands. All data sent or received are serialized in JSON.
 
 ### Available commands
 
