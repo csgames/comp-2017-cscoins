@@ -2,6 +2,9 @@
 
 This document might still be updated until the beginning of the CS Games 2017. We recommend the interested parties to watch the [https://github.com/csgames/compe2017](https://github.com/csgames/compe2017) repository to get notified as soon as a new change is introduced. For any issues, bug or needed clarification, please open an issue in the Github project.
 
+This repository contains the CSCoin specification and the source code for the Central Authority server. More samples should be added in the near future to manage a CSCoin wallet and a (slow) reference implementation for a miner.
+
+Enjoy!
 
 # CSCoins Documentation
 
