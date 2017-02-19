@@ -160,77 +160,48 @@ How lucky we are, another CSCoin awarded to our wallet. That's pretty much what 
 
 ### Sorted List
 
-<div class="challenge-section">**Challenge Name**: sorted_list
-<div class="challenge-parameter-section">**Parameter(s)**
-**nb_elements**: Number of Integer to sort in descending order
-</div>
-**Solution String formatting**
+This challenge is simple and yet offers many ways to the miners to optimize their processing. The challenge begins by generating 64 bits unsigned integers from the PRNG. Afterward the miner has to sort all the numbers to hash the solution.
 
-Append all integer into the right order in the solution string.
-**Example**: 2, 3, 4, 5, 400 
+**Challenge Name**: `sorted_list`
+**Parameters**:
+ * **nb_elements**: Number of integer to generate and sort.
 
-                    Solution String = 2345400
+**Solution String Formatting**: Convert all integer into their decimal string representation and join all together without any whitespaces.
 
-</div>
+**Example**: Given the numbers `[400, 2, 4, 3, 5]`, the solution string would be `"2345400"`.
 
 #### Reverse Sorted List
 
-<div class="challenge-section">**Challenge Name**: reverse_sorted_list
-<div class="challenge-parameter-section">**Parameter(s)**
-**nb_elements**: Number of Integer to sort in descending order
-</div>
-**Solution String formatting**
 
-Append all integer into the right order in the solution string.
-**Example**: 2, 3, 4, 5, 400 
+Just like the Sorted List challenge, this challenge begins by generating 64 bits unsigned integers from the PRNG. Afterward the miner has to sort all the numbers in **descending order** to hash the solution.
 
-                    Solution String = 4005432
+**Challenge Name**: `reverse_sorted_list`
+**Parameters**:
+ * **nb_elements**: Number of integer to generate and sort.
 
-</div>
+**Solution String Formatting**: Convert all integer into their decimal string representation and join all together without any whitespaces.
 
-More challenges will be added later...
+**Example**: Given the numbers `[400, 2, 4, 3, 5]`, the solution string would be `"4005432"`.
 
-### Wallet
+## Wallet
 
-A wallet is a RSA key pair of 1024 bits. To send or receive coins, we use the Wallet Id. The Wallet Id is a SHA256 Hash of your public key in DER ([Distinguished Encoding Rules](https://en.wikipedia.org/wiki/X.690#DER_encoding)) format.
+A wallet is a RSA key pair of 1024 bits. To send or receive coins, we use the Wallet Id. The Wallet Id is a SHA256 Hash of a client public key in DER ([Distinguished Encoding Rules](https://en.wikipedia.org/wiki/X.690#DER_encoding)) format.
 
-				You need your private key to sign the submission message and create transaction message to prove that you're the owner of the wallet.
+A client need its private key to sign the submission message and create transaction message to prove that it is the owner of the wallet.
 
-				You will need to register your public key on the Central Authority Server, to be able to do submission and create transaction.
+A client will need to register its public key on the Central Authority Server, to be able to do submission and create transaction.
 
-                To calculate your Wallet balance, you need to retrieve all the transactions and compute your transactions.
+To calculate a client's Wallet balance, a client needs to retrieve all the transactions and compute the transactions outcomes.
 
 ### Message Signature
 
-We are using RSA digital signature protocol according to PKCS#1 v1.5
-
-				Some message required a signature, to validate that you're the owner of the wallet. 
-
-				To generate a valid signature, in the command that need one. We specify the string value to hash with SHA256\. 
-
-				Normally this is the arguments of the command, concatenated together separated with a comma (,).
-
-				The message is always encoded in ASCII.
-
-				You need to use the hash digest and sign it with your private key, to generate the signature.
-
-				Your signature must be represented in hexadecimal in your command.
-
-				The server will try to validate your signature against your public key
+We are using RSA digital signature protocol according to PKCS#1 v1.5. Some message required a signature, to validate that the client is the owner of the wallet. Usually, the signed contents are the arguments of the command, joined together by a comma (`,`). A signature is always represented in an stringified hexadecimal format. The Central Authority server will validate the signature against the registered public key by the client.
 
 ### Communication with the Central Authority
 
-The Central Authority Server use the WebSocket protocol to communicate.
+The Central Authority Server use the [WebSocket protocol](https://en.wikipedia.org/wiki/WebSocket) to communicate. The server URI is [wss://cscoins.2017.csgames.org:8989/client](wss://cscoins.2017.csgames.org:8989/client). Once a client is connected, the server will be waiting for any incoming commands. All data sent or received are serialized in JSON. 
 
-                The server URI is **wss://cscoins.2017.csgames.org:8989/client**
-
-                All data sended and received are serialized into JSON. The server is waiting for a Command.
-
-                The server is answering with a command response.
-
-                If the field success is true, the command execution is successful, other fields can also be in the response, depending on the command executed.
-
-#### Available commands
+### Available commands
 
 *   [get_current_challenge](#get-current-challenge-command)
 *   [get_challenge_solution](#get-challenge-solution-command)
@@ -243,15 +214,16 @@ The Central Authority Server use the WebSocket protocol to communicate.
 
 #### Command object
 
-<table class="table .table-striped"><thead><tr><th>Field Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>command</td><td>String</td><td>The name of the command. Example: get_challenge_solution, create_transaction, register_wallet,...</td></tr><tr><td>args</td><td>Dictionary <String, Object></td><td>Parameters for the command, see each command documentation</td></tr></tbody></table>
+|Field Name|Type|Description|
+|----------|----|-----------|
+|command|String|The name of the command. **Example**: `get_challenge_solution`|
+|args|Dictionary&lt;String, Object&gt;|Parameters for the command, see each command's documentation|
 
 #### Get Current Challenge
 
-<div>
-
 Fetch the current problem set from the Central Authority
 
-**Command Name: **get_current_challenge
+**Command Name:** get_current_challenge
 
 ##### Argument(s)
 
@@ -259,31 +231,41 @@ There's no arguments.
 
 ##### Response
 
-<table class="table .table-striped"><thead><tr><th>Field name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>success</td><td>Boolean</td><td>-</td></tr><tr><td>time_left</td><td>Integer</td><td>Time left in seconds to solve the problem set.</td></tr><tr><td>challenge_id</td><td>Integer</td><td>Current Challenge Id</td></tr><tr><td>challenge_name</td><td>String</td><td>Current Challenge name</td></tr><tr><td>hash_prefix</td><td>String</td><td>Solution hash prefix</td></tr><tr><td>parameters</td><td>Dictionary<String, Object></td><td>Parameters of the challenge, they can changed depending on the challenge name</td></tr></tbody></table></div>
+|Field Name|Type|Description|
+|----------|----|-----------|
+|time_left|Integer|Time left in seconds to solve the problem set.|
+|challenge_id|Integer|Current challenge id|
+|challenge_name|String|Current challenge type name. **Example**: `sorted_list`|
+|hash_prefix|String|Solution hash prefix used to validate a solution hash. The prefix is represented in a hexadecimal string format. **Example**: `a4f1`|
+|last_solution_hash|String|Last valid solution hash. Must be used as part of the seed for the current challenge. **Example**: `30fe523cb3c9007b50242736a8a099215e6ea533f3c8012c9dac34756257d6dc`|
+|parameters|Dictionary&lt;String, Object&gt;|Parameters of the challenge, they are specific to the challenge type. See the Challenge Type section for more details.|
 
 #### Get previous solutions
 
-<div>
-
 Fetch the solution of a challenge
 
-**Command Name: **get_challenge_solution
+**Command Name:** get_challenge_solution
 
 ##### Argument(s)
 
-<table class="table .table-striped"><thead><tr><th>Name</th><th>Type</th><th>Value</th></tr></thead><tbody><tr><td>challenge_id</td><td>Integer</td><td>Challenge Id of the solution wanted</td></tr></tbody></table>
+|Field Name|Type|Description|
+|----------|----|-----------|
+|challenge_id|Integer|Challenge id for which a solution is requested.|
 
 ##### Response
 
-<table class="table .table-striped"><thead><tr><th>Field name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>success</td><td>Boolean</td><td>-</td></tr><tr><td>challenge_id</td><td>Integer</td><td>Challenge Id of the solution</td></tr><tr><td>challenge_name</td><td>String</td><td>Challenge name</td></tr><tr><td>nonce</td><td>Integer</td><td>Solution Nonce of the Challenge</td></tr><tr><td>hash</td><td>Integer</td><td>Solution Hash of the Challenge</td></tr><tr><td>solution_string</td><td>String</td><td>Solution String of the Challenge</td></tr><tr><td>parameters</td><td>Dictionary<String, Object></td><td>Parameters of the challenge</td></tr></tbody></table></div>
+The response has the same content as the `get_current_challenge` command, with the addition of those two fields:
+
+|Field Name|Type|Description|
+|----------|----|-----------|
+|nonce|String|Nonce used to seed the PRNG.|
+|solution_hash|String|Solution hash that validated with the challenge prefix.|
 
 #### Close connection
 
-<div>
-
 Close the connection with the Central Authority Server
 
-**Command Name: **close
+**Command Name**: close
 
 ##### Argument(s)
 
@@ -293,84 +275,101 @@ There's no arguments.
 
 There's no response.
 
-</div>
-
 #### Register a new Wallet
 
-<div>
+Register your Wallet's public key with the Central Authority.
 
-Register your Wallet PublicKey with the Central Authority.
-
-**Command Name: **register_wallet
+**Command Name**: register_wallet
 
 ##### Argument(s)
 
-<table class="table .table-striped"><thead></thead><tbody><tr><th>Name</th><th>Type</th><th>Value</th></tr></tbody><tbody><tr><td>name</td><td>String</td><td>Your Wallet Name, you should use your Team Name here</td></tr><tr><td>key</td><td>String</td><td>Your wallet public key, in PEM Format ([Privacy-enhanced Electronic Mail](https://en.wikipedia.org/wiki/Privacy-enhanced_Electronic_Mail)).</td></tr><tr><td>signature</td><td>String</td><td>[Message Signature](#message-signature) in hexadecimal format. The message used is `wallet_id`, not hashed, because it's already an hash of your public key.</td></tr></tbody></table>
+|Field Name|Type|Description|
+|----------|----|-----------|
+|name|String|Your Wallet Name, you should use your Team Name here.|
+|key|String|Your wallet's public key, in [PEM](https://en.wikipedia.org/wiki/Privacy-enhanced_Electronic_Mail) format.|
+|signature|String|[Message signature](#message-signature) in hexadecimal format. The signed message used is the `wallet_id` being registered.|
 
 ##### Response
 
-<table class="table .table-striped"><thead><tr><th>Field name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>success</td><td>Boolean</td><td>-</td></tr><tr><td>wallet_id</td><td>String</td><td>Your new Wallet Id</td></tr></tbody></table></div>
+|Field Name|Type|Description|
+|----------|----|-----------|
+|error|String|Error message if something went wrong|
 
 #### Get Transactions
 
-<div>
-
 Get transactions history from the Central Authority.
 
-**Command Name: **get_transactions
+**Command Name**: get_transactions
 
 ##### Argument(s)
 
-<table class="table .table-striped"><thead><tr><th>Name</th><th>Type</th><th>Value</th></tr></thead><tbody><tr><td>start</td><td>Integer</td><td>Starting index</td></tr><tr><td>count</td><td>Integer</td><td>Number of transactions to fetch. Maximum 100.</td></tr></tbody></table>
+|Field Name|Type|Description|
+|----------|----|-----------|
+|start|Integer|Starting index of the requested transactions.|
+|count|Integer|Number of transaction requested.|
 
 ##### Response
 
-<table class="table .table-striped"><thead><tr><th>Field name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>success</td><td>Boolean</td><td>-</td></tr><tr><td>count</td><td>Integer</td><td>Number of transactions</td></tr><tr><td>transactions</td><td>Array<Transaction></td><td>Transaction(s)</td></tr></tbody></table>
+|Field Name|Type|Description|
+|----------|----|-----------|
+|error|String|Error message if something went wrong|
+|transactions|Array&lt;Transaction&gt;|List of transaction(s)|
 
 ##### Transaction Object
 
-<table class="table .table-striped"><thead><tr><th>Field Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>id</td><td>Integer</td><td>Transaction Id</td></tr><tr><td>source</td><td>String</td><td>Source Address (Wallet Id or alias)</td></tr><tr><td>recipient</td><td>String</td><td>Recipient Address (Wallet Id or alias)</td></tr><tr><td>amount</td><td>Decimal</td><td>Transaction Amount</td></tr></tbody></table></div>
+|Field Name|Type|Description|
+|----------|----|-----------|
+|id|Integer|Transaction id|
+|source|String|Source Wallet id|
+|recipient|String|Recipient Wallet id|
+|amount|Decimal|Transaction amount|
 
 #### Create a new Transaction (Send coins)
 
-<div>
+Create a new Transaction, sending coins to another wallet
 
-Create a new Transaction. Sending coins to another wallet
-
-**Command Name: **create_transaction
+**Command Name**: create_transaction
 
 ##### Argument(s)
 
-<table class="table .table-striped"><thead><tr><th>Name</th><th>Type</th><th>Value</th></tr></thead><tbody><tr><td>source</td><td>String</td><td>Your Wallet Id</td></tr><tr><td>recipient</td><td>String</td><td>Recipient Wallet Id</td></tr><tr><td>amount</td><td>Decimal</td><td>Amount to send, Minimum 0.00001.</td></tr><tr><td>signature</td><td>String</td><td>[Message Signature](#message-signature) in hexadecimal format. The message used is `source,recipient,amount`. The amount is a decimal number formatted with 5 digit of precision.
-**Example:** Amount = 2, would be writted as 2.00000 in the message.</td></tr></tbody></table>
+|Field Name|Type|Description|
+|----------|----|-----------|
+|source|String|Source Wallet id|
+|recipient|String|Recipient Wallet id|
+|amount|Decimal|Amount to send, Minimum 0.00001.|
+|signature|String|[Message Signature](#message-signature) in hexadecimal format. The signed message is `source,recipient,amount`. The amount is a decimal number formatted with 5 digit of precision. **Example**: `amount` = 2, would be writted as `2.00000` in the message. The signature must be validated by the public key related to the source Wallet id.|
 
 ##### Response
 
-<table class="table .table-striped"><thead><tr><th>Field name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>success</td><td>Boolean</td><td>-</td></tr><tr><td>id</td><td>Integer</td><td>New Transaction Id</td></tr></tbody></table></div>
+|Field Name|Type|Description|
+|----------|----|-----------|
+|error|String|Error message if something went wrong.|
+|id|Integer|New transaction id.|
 
 #### Submit a problem solution
 
-<div>
+Submit a solution for the current challenge, awarding CSCoins to the miner if the solution is valid.
 
-Submit a solution for a challenge, it must be the current challenge, else it will be ignored.
-
-**Command Name: **submission
+**Command Name**: submission
 
 ##### Argument(s)
 
-<table class="table .table-striped"><thead><tr><th>Name</th><th>Type</th><th>Value</th></tr></thead><tbody><tr><td>wallet_id</td><td>String</td><td>Challenge Id</td></tr><tr><td>challenge_id</td><td>Integer</td><td>Challenge Id</td></tr><tr><td>nonce</td><td>Integer</td><td>Solution nonce</td></tr><tr><td>hash</td><td>String</td><td>Solution Hash in hexadecimal format.</td></tr><tr><td>signature</td><td>String</td><td>[Message Signature](#message-signature) in hexadecimal format. The message used is `challenge_id,nonce,hash`</td></tr></tbody></table>
+|Field Name|Type|Description|
+|----------|----|-----------|
+|wallet_id|String|Miner Wallet id.|
+|nonce|String|Nonce used to find a valid solution hash.|
 
 ##### Response
 
-<table class="table .table-striped"><thead><tr><th>Field name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>success</td><td>Boolean</td><td>-</td></tr><tr><td>submission_id</td><td>Integer</td><td>Your submission Id for this challenge</td></tr></tbody></table></div>
+|Field Name|Type|Description|
+|----------|----|-----------|
+|error|String|Error message if something went wrong.|
 
 #### Get Central Authority Server Information
 
-<div>
+Fetch the current information of the Central Authority server
 
-Fetch the current information of the Central Authority Server
-
-**Command Name: **ca_server_info
+**Command Name**: ca_server_info
 
 ##### Argument(s)
 
@@ -378,5 +377,9 @@ There's no arguments.
 
 ##### Response
 
-<table class="table .table-striped"><thead><tr><th>Field name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>success</td><td>Boolean</td><td>-</td></tr><tr><td>minutes_per_challenge</td><td>Integer</td><td>Maximum length of a challenge in minutes.</td></tr><tr><td>coins_per_challenge</td><td>Integer</td><td>Coins awarded for a subsmission.</td></tr><tr><td>min_transaction_amount</td><td>Decimal</td><td>Minimum transaction amount.</td></tr><tr><td>ca_public_key</td><td>String</td><td>Central Authority PublicKey in PEM Format ([Privacy-enhanced Electronic Mail](https://en.wikipedia.org/wiki/Privacy-enhanced_Electronic_Mail)).</td></tr></tbody></table></div></div>
-    
+|Field Name|Type|Description|
+|----------|----|-----------|
+|minutes_per_challenge|Integer|Maximum time of a challenge in minutes.|
+|coins_per_challenge|Integer|Coins awarded for a valid subsmission.|
+|min_transaction_amount|Decimal|Minimum transaction amount.|
+|ca_public_key|String|Central Authority PublicKey in ([PEM](https://en.wikipedia.org/wiki/Privacy-enhanced_Electronic_Mail)) format.|
