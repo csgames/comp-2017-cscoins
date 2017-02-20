@@ -44,7 +44,7 @@ Once the challenge dataset is generated, the miner has to solve the challenge. I
 
 Finally, the solution string is hashed with SHA256 and the result compared to the prefix provided by the Central Authority server. If it does match, the miner can submit the nonce used to generate the challenge and get awarded a CSCoin!
 
-Else, the miner needs to try again with a new random nonce, generate a new challenge dataset, sort it, and keep trying until a solution hash matches the wanted prefix.
+Otherwise, the miner needs to try again with a new random nonce, generate a new challenge dataset, sort it, and keep trying until a solution hash matches the wanted prefix.
 ### Example
 
 The miner starts by requesting the current challenge properties from the Central Authority. It gives it the first challenge:
@@ -83,7 +83,7 @@ We build the solution string by concatenating those numbers together:
 
 We finally hash this solution string to know if it matches the challenge hash prefix: `e9528071d01ab08cc4c9e74fee45df95af0256a469f17aa88918dc14a4008eb7`
 
-`e952` != `94f9`, So we need to try again. We generate a new random nonce, reseed the random number generator.
+`e952` != `94f9`, So we need to try again. We generate a new random nonce and reseed the random number generator.
 
 Our new random nonce is `"96436717027"`.
 
@@ -197,15 +197,15 @@ Just like the Sorted List challenge, this challenge begins by generating 64 bits
 
 A wallet is a RSA key pair of 1024 bits. To send or receive coins, we use the Wallet Id. The Wallet Id is a SHA256 Hash of a client public key in DER ([Distinguished Encoding Rules](https://en.wikipedia.org/wiki/X.690#DER_encoding)) format.
 
-A client needs its private key to sign the submission message and create transaction message to prove that it is the owner of the wallet.
+A client needs its private key to sign the submission message and create a transaction message to prove that it is the owner of the wallet.
 
-A client will need to register its public key on the Central Authority Server, to be able to do submission and create transaction.
+A client will need to register its public key on the Central Authority Server to be able to do submission and create a transaction.
 
-To calculate a client's Wallet balance, a client needs to retrieve all the transactions and compute the transactions outcomes.
+To calculate a client's Wallet balance, a client needs to retrieve all the transactions and compute the transaction outcomes.
 
 ### Message Signature
 
-We are using RSA digital signature protocol according to PKCS#1 v1.5. Some message required a signature, to validate that the client is the owner of the wallet. Usually, the signed contents are the arguments of the command, joined together by a comma (`,`). A signature is always represented in a stringified hexadecimal format. The Central Authority server will validate the signature against the registered public key by the client.
+We are using RSA digital signature protocol according to PKCS#1 v1.5. Some messages required a signature to validate that the client is the owner of the wallet. Usually, the signed contents are the arguments of the command, joined together by a comma (`,`). A signature is always represented in a stringified hexadecimal format. The Central Authority server will validate the signature against the registered public key by the client.
 
 ### Communication with the Central Authority
 
