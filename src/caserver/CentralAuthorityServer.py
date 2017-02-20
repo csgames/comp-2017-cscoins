@@ -37,8 +37,6 @@ class CentralAuthorityServer(object):
         self.wallets = []
         self.authority_wallet = None
         self.clients = []
-        self.ca_keyfile = ""
-        self.ca_key = ""
         self.ca_name = "unnamed"
         self.transactions = []
         self.current_transaction_id = 0
@@ -176,9 +174,6 @@ class CentralAuthorityServer(object):
             print("Error occured with connection {0}:{1}, {2}".format(remote_addr[0], remote_addr[1], e))
 
     def initialize(self):
-        if not os.path.exists(self.ca_keyfile):
-            print('CA KeyFile not found')
-
         if not os.path.exists('ca_key.priv') and not os.path.exists('ca_key.pub'):
             print("Generating CA Key pair")
             prng = Random.new().read

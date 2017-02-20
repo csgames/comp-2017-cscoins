@@ -94,37 +94,32 @@ def reconstruct_path(came_from, start_pos, end_pos):
 
 
 class ShortestPathChallenge(BaseChallengeGenerator):
-    def __init__(self):
-        BaseChallengeGenerator.__init__(self, 'shortest_path')
+    def __init__(self, config_file):
+        BaseChallengeGenerator.__init__(self, 'shortest_path', config_file)
         self.parameters["grid_size"] = 100
         self.parameters["nb_blockers"] = 5000
 
-    def generate(self, previous_solutions):
+    def generate(self, previous_hash):
         # generate a nonce
         nonce = random.randint(1000, 10000) # put that into a configuration file
         print("Generating {0} problem nonce = {1}".format(self.problem_name, nonce))
 
         grid = Grid(self.parameters["grid_size"])
-
+        seed_hash = self.generate_seed_hash(previous_hash, nonce)
         # seed is the last solution hash suffix, else it's 0
-        last_hash = self.last_solution_hash(previous_solutions)
-        prng = coinslib.MersenneTwister(coinslib.seed_from_hash(last_hash))
+        prng = coinslib.MT64(coinslib.seed_from_hash(seed_hash))
 
-        start_pos = (prng.next_int_between(0, self.parameters["grid_size"]), prng.next_int_between(0, self.parameters["grid_size"]))
-        end_pos = (prng.next_int_between(0, self.parameters["grid_size"]), prng.next_int_between(0, self.parameters["grid_size"]))
+        start_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
+        end_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
 
         # placing walls
         for i in range(self.parameters["nb_blockers"]):
             # wall pos (row, col)
-            block_pos = (prng.next_int_between(0, self.parameters["grid_size"]), prng.next_int_between(0, self.parameters["grid_size"]))
+            block_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
             if block_pos != start_pos and block_pos != end_pos:
                 grid.walls.append(block_pos)
 
         # starting and ending position
-        # print(start_pos)
-        # print(end_pos)
-        # todo generate an image of the challenge
-        # to know if its valid
         solution_string = ""
 
         try:
@@ -137,5 +132,5 @@ class ShortestPathChallenge(BaseChallengeGenerator):
             print("Shortest Path Challenge error: {0}".format(e))
             # No solution exists, so solution string should be empty
 
-        hash = self.generate_hash(previous_solutions, solution_string, nonce)
+        hash = self.generate_hash(solution_string)
         return Challenge(self.problem_name, nonce, solution_string, hash, self.parameters)
