@@ -154,12 +154,15 @@ Not matching the `9098` prefix sent by the Central Authority server...
 
 We keep trying with new random nonce.
 
-Nonce: `37185758862`
-Seed: `\x6a\x1b\xc5\x93\x3d\x93\xed\x33`
+Nonce: `814267888`
+Seed: `\x1e\xcd\xad\x5d\xa4\x6f\x9c\xd1`
 Solution String:
 ```json
+14972298174551654431723443700797644249245561621187992295327772395864560490123211875208621964684366752263225374374359043564571525613596800776372508179546694401260438463381870003110298946106127394782186625229873765168077041493964789015194588102489029158224598323790499101425615433341222851103238794091706851112945981076343021800175517732451163502481827820657423093272318368446283940966322
 ```
-**TODO: find valid nonce**
+
+We hash the solution: `90985e24a9e0b8ece598cf643e303424ae5d1c3f5a9903c08f1dcd3b8e1a3454`.
+Matching the prefix sent by the Central Authority server.
 
 How lucky we are, another CSCoin awarded to our wallet. That's pretty much what mining is about. Generate a challenge dataset, solve it and check if the solution hash is valid. Rinse and repeat!
 
