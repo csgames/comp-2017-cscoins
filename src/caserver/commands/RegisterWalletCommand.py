@@ -24,7 +24,7 @@ class RegisterWalletCommand(BaseCommand):
             existing_wallet = self.database.get_wallet_by_id(wallet_id)
 
             if existing_wallet is not None:
-                print("Wallet {0} already registered")
+                response["error"] = "Wallet {0} already registered"
                 return
 
             # verifying the signature
@@ -33,18 +33,19 @@ class RegisterWalletCommand(BaseCommand):
 
             if not signer.verify(sha2, sign_bytes):
                 print("Invalid Signature for Wallet Id {0}".format(wallet_id))
+                response["error"] = "Invalid Signature"
                 return
 
             w = Wallet(name, key, wallet_id)
 
             self.database.create_wallet(w)
 
-            response['success'] = True
             response['wallet_id'] = wallet_id
 
             self.database.add_wallet_balance(w)
 
             print("New wallet registered -> {0}".format(wallet_id))
-
+        except KeyError as e:
+            response["error"] = "Missing argument(s)"
         except Exception as e:
             print("{0} exception : {1}".format(self.__class__, e))

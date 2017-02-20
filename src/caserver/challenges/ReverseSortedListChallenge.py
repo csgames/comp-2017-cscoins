@@ -15,19 +15,17 @@ class ReverseSortedListChallenge(BaseChallengeGenerator):
         self.parameters["nb_elements"] = self.config_file.get_int('reverse_sorted_list.nb_elements', 100)
         self.read_nonce_limit()
 
-    def generate_solution(self, previous_solutions, nonce):
+    def generate_solution(self, previous_hash, nonce):
         # seed is the last solution hash suffix, if not
-        seed_hash = self.generate_seed_hash(previous_solutions, nonce)
+        seed_hash = self.generate_seed_hash(previous_hash, nonce)
 
-        prng = coinslib.MersenneTwister64(coinslib.seed_from_hash(seed_hash))
+        prng = coinslib.MT64(coinslib.seed_from_hash(seed_hash))
 
         element_list = []
 
         # generate n elements
         for i in range(self.parameters["nb_elements"]):
-            element_list.append(prng.next())
-
-        prng.dispose()
+            element_list.append(prng.extract_number())
 
         element_list.sort(reverse=True)
 
@@ -36,6 +34,6 @@ class ReverseSortedListChallenge(BaseChallengeGenerator):
         for i in element_list:
             solution_string += "{0}".format(i)
 
-        hash = self.generate_hash(previous_solutions, solution_string)
+        hash = self.generate_hash(solution_string)
 
         return Challenge(self.problem_name, nonce, solution_string, hash, self.parameters)

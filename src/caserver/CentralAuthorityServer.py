@@ -74,7 +74,6 @@ class CentralAuthorityServer(object):
         self.ssl_on = self.config_file.get_bool('ssl_on', True)
         self.ssl_cert = self.config_file.get_string('ssl_cert', '../server.pem')
 
-        self.ca_keyfile = self.config_file.get_string('ca_keyfile', 'ca_key.txt')
         self.ca_name = self.config_file.get_string('ca_name', 'CS Games Coin Authority')
         self.aliases_per_wallet = self.config_file.get_int('aliases_per_wallet', 25)
 
@@ -82,7 +81,7 @@ class CentralAuthorityServer(object):
         self.minutes_per_challenge = self.config_file.get_decimal('minutes_per_challenge', 15)
 
         self.min_transaction_amount = self.config_file.get_decimal('min_transaction_amount', .00001)
-        self.available_challenges = self.config_file.get_string_tuple('available_challenges', [])
+        self.available_challenges = self.config_file.get_string_tuple('available_challenges', ['sorted_list', 'reverse_sorted_list'])
         self.prefix_length = self.config_file.get_int('prefix_length', 4)
 
         submissions_ips = self.config_file.get_string('submissions_allowed_ips', '')
@@ -114,9 +113,8 @@ class CentralAuthorityServer(object):
         return remote_ip in self.submissions_allowed_ips
 
     async def execute_client_command(self, client_connection, command, args):
-        response = {'success': False}
         command_handler = None
-
+        response = {}
         for ch in self.commands_handler:
             if ch.command_name == command:
                 command_handler = ch
@@ -172,9 +170,6 @@ class CentralAuthorityServer(object):
         try:
             if path == '/client':
                 await self.handle_client(websocket)
-            elif path == '/dashboard':
-                # todo
-                pass
             else:
                 websocket.close()
         except Exception as e:
@@ -293,20 +288,9 @@ class CentralAuthorityServer(object):
                         print("Invalid transaction {0}".format(t.id))
                 else:
                     print("Invalid transaction {0}".format(t.id))
-                    # todo invalidate transaction
 
             except Exception as e:
                 print("calculate_wallets_balance exception : {0}".format(e))
-        
-        # verifying integrity of wallet balance
-        balance_sum = 0
-        for w in self.wallets:
-            balance_sum += w.balance
-
-        if self.min_transaction_amount > balance_sum > -self.min_transaction_amount:
-            print("Wallet integrity OK ! balance = {0}".format(balance_sum))
-        else:
-            print("Wallet balance sum isn't zero (min_transaction_amount), correction needed, current balance = {0}".format(balance_sum))
 
     def resolve_wallet(self, address):
         for w in self.wallets:
@@ -332,7 +316,6 @@ class CentralAuthorityServer(object):
             asyncio.get_event_loop().run_forever()
         except KeyboardInterrupt:
             print("Closing the server")
-            self.problem_thread.alive = False
             asyncio.get_event_loop().close()
 
 

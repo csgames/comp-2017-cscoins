@@ -1,19 +1,12 @@
 #### Central Authority Server
 
-### Dependancies
-
+### Dependencies
  * Python 3.5+
  * Websockets
  * asyncio
  * mysqlclient
  * pycrypto
  * numpy
-
-### TODO
- - [ ] Adapt difficulty from pasts submission time.
- - [ ] More API to monitor transactions, mining, etc.
- - [ ] Logging.
- - [ ] Cleanup connections.
 
 ### Infra
  * Tested on debian testing (stretch).

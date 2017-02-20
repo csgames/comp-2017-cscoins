@@ -37,16 +37,6 @@ class ServerDatabase:
                       PRIMARY KEY (`transaction_id`)
                     ) ENGINE=InnoDB DEFAULT CHARSET=latin1;""")
 
-        cur.execute("""CREATE TABLE IF NOT EXISTS `distributions` (
-                      `distribution_id` int(11) NOT NULL AUTO_INCREMENT,
-                      `challenge_id` INT(11) NOT NULL,
-                      `submission_id` INT(11) NOT NULL,
-                      `distribution_value` decimal(12,5) NOT NULL,
-                      `recipient_alias` varchar(65) NOT NULL,
-                      `recipient_wallet_nid` INT(11) NOT NULL,
-                      `created_on` int(11) DEFAULT NULL,
-                      PRIMARY KEY (`distribution_id`)
-                    ) ENGINE=InnoDB DEFAULT CHARSET=latin1;""")
 
         cur.execute("""CREATE TABLE IF NOT EXISTS `wallet_balances` (
                         `wallet_balance_id` INT NOT NULL AUTO_INCREMENT,
@@ -320,11 +310,11 @@ class ServerDatabase:
         row = cur.fetchone()
         if row:
             submission.id = row[0]
-            query = """UPDATE submissions SET hash = %s, nonce = %s, submitted_on = %s WHERE submission_id = %s"""
-            rs = cur.execute(query, (submission.hash, submission.nonce, timestamp, submission.id, ))
+            query = """UPDATE submissions SET nonce = %s, submitted_on = %s WHERE submission_id = %s"""
+            rs = cur.execute(query, (submission.nonce, timestamp, submission.id, ))
         else:
-            query = """INSERT INTO submissions (challenge_id, nonce, hash, wallet_nid, submitted_on) VALUES (%s, %s, %s, %s, %s)"""
-            rs = cur.execute(query, (submission.challenge_id, submission.nonce, submission.hash, submission.wallet.nid, timestamp, ))
+            query = """INSERT INTO submissions (challenge_id, nonce, wallet_nid, submitted_on) VALUES (%s, %s, %s, %s)"""
+            rs = cur.execute(query, (submission.challenge_id, submission.nonce, submission.wallet.nid, timestamp, ))
 
             query = """SELECT submission_id FROM submissions WHERE challenge_id = %s AND wallet_nid = %s AND submitted_on = %s"""
             rs = cur.execute(query, (submission.challenge_id, submission.wallet.nid, timestamp))
@@ -383,7 +373,7 @@ class ServerDatabase:
             wallet.nid = int(row[5])
             wallet.balance = decimal.Decimal(row[9])
 
-            submission = Submission(int(row[1]), int(row[2]), row[3], wallet)
+            submission = Submission(int(row[1]), int(row[2]), wallet)
             submission.id = int(row[0])
             submission.submitted_on = int(row[4])
 
@@ -614,27 +604,3 @@ class ServerDatabase:
         conn.close()
 
         return wallets
-
-    def create_distribution(self, distribution):
-        conn = self.connect()
-        cur = conn.cursor()
-        timestamp = int(time.time())
-
-        query = """INSERT INTO distributions (challenge_id, submission_id, distribution_value, recipient_alias, recipient_wallet_nid, created_on) VALUES (%s, %s, %s, %s, %s, %s)"""
-
-        result = cur.execute(query, (distribution.challenge_id, distribution.submission_id, "{0:.5f}".format(distribution.value), distribution.alias, distribution.wallet_nid, timestamp,))
-
-        distribution.created_on = timestamp
-
-        conn.commit()
-
-        cur.close()
-        conn.close()
-
-    def get_distributions(self, start=0, count=100):
-        distributions = []
-        conn = self.connect()
-        cur = conn.cursor()
-
-        cur.close()
-        conn.close()

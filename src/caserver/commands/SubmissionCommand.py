@@ -17,41 +17,21 @@ class SubmissionCommand(BaseCommand):
             return
 
         try:
-            # validate submission right away
-            challenge_id = int(args['challenge_id'])
             nonce = int(args['nonce'])
-            hash = args['hash']
             wallet_id = args['wallet_id']
-            signature = args['signature']
-
-            # todo
-            # verifying the signature first
-            message = "{0},{1},{2}".format(challenge_id, nonce, hash)
-            hasher = SHA256.new()
-            hasher.update(message.encode('ascii'))
 
             wallet = self.database.get_wallet_by_id(wallet_id)
 
             if wallet is None:
-                return
-
-            try:
-                wallet_key = RSA.importKey(wallet.key)
-                signer = PKCS1_v1_5.new(wallet_key)
-                if not signer.verify(hasher, bytes.fromhex(signature)):
-                    print("Signature invalid for Wallet : {0}".format(wallet_id))
-                    return
-            except:
-                print("Wallet {0} isn't registered".format(wallet_id))
+                response["error"] = "Unregistered wallet"
                 return
 
             current_challenge = self.database.get_current_challenge()
             print("Submission accepted for Wallet {0}".format(wallet.id))
-            if current_challenge.id == challenge_id:
-                submission = Submission(challenge_id, nonce, hash, wallet)
-                self.database.add_or_update_submission(submission)
-                response['success'] = True
-                response['submission_id'] = submission.id
+            submission = Submission(current_challenge.id, nonce, wallet)
+            self.database.add_or_update_submission(submission)
 
+        except KeyError as e:
+            response["error"] = "Missing argument(s)"
         except Exception as e:
             print("{0} exception : {1}".format(self.__class__, e))

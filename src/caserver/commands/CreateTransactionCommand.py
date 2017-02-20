@@ -25,6 +25,7 @@ class CreateTransactionCommand(BaseCommand):
             if source_wallet is None:
                 # invalid source
                 remote_ip = client_connection.get_remote_ip()
+                response["error"] = "Source and/or recipient wallet invalid"
                 print("Invalid transaction (invalid source) tentative from ({0})".format(remote_ip))
                 return
 
@@ -36,11 +37,13 @@ class CreateTransactionCommand(BaseCommand):
 
             if not signer.verify(hasher, sign_digest):
                 print("Invalid signature from {0}".format(source))
+                response["error"] = "Invalid signature"
                 return
 
             if recipient_wallet is None or source_wallet is None:
                 # invalid recipient
                 remote_ip = client_connection.get_remote_ip()
+                response["error"] = "Source and/or recipient wallet invalid"
                 print("Invalid transaction (invalid recipient) tentative from ({0})".format(remote_ip))
                 return
 
@@ -48,12 +51,14 @@ class CreateTransactionCommand(BaseCommand):
             if source_wallet.balance < amount or amount < self.min_transaction_amount:
                 remote_ip = client_connection.get_remote_ip()
                 print("Invalid transaction (not enough funds) tentative from ({0})".format(remote_ip))
+                response["error"] = "Not enough coins"
                 return
 
             # Just in case...
             if recipient_wallet.id == source_wallet.id:
                 remote_ip = client_connection.get_remote_ip()
                 print("Invalid transaction (same wallet) tentative from ({0})".format(remote_ip))
+                response["error"] = "Source and recipient are the same wallet"
                 return
 
             # completing transaction
@@ -65,9 +70,10 @@ class CreateTransactionCommand(BaseCommand):
             txn = Transaction.Transaction(0, source_wallet.id, recipient_wallet.id, amount)
             txn.signature = signature
             self.database.create_transaction(txn)
-            response['success'] = True
             response['id'] = txn.id
 
+        except KeyError as e:
+            response["error"] = "Missing argument(s)"
         except Exception as e:
             print("{0} exception : {1}".format(self.__class__, e))
 

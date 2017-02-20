@@ -22,7 +22,9 @@ class GetTransactionsCommand(BaseCommand):
                 response['transactions'].append({'id': t.id, 'source': t.source, 'recipient': t.recipient, 'amount': str(t.amount)})
 
             response['success'] = True
-            response['count'] = len(transactions)           
-                   
+            response['count'] = len(transactions)
+
+        except KeyError as e:
+            response["error"] = "Missing argument(s)"
         except Exception as e:
             print("{0} exception : {1}".format(self.__class__, e))

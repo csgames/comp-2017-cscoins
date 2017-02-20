@@ -17,12 +17,12 @@ class ChallengeThread(threading.Thread):
         self.previous_challenge = []
         self.generators = []
         self.alive = True
+        self.last_solution_hash = "0" * 64
         self.__init_generators()
         self.__init_challenges()
 
     def __init_generators(self):
         self.generators.append(ReverseSortedListChallenge(self.central_authority_server.config_file))
-        #self.generators.append(ShortestPathChallenge(self.central_authority_server.config_file))
         self.generators.append(SortedListChallenge(self.central_authority_server.config_file))
 
     def __init_challenges(self):
@@ -57,7 +57,10 @@ class ChallengeThread(threading.Thread):
             for c in self.previous_challenge:
                 challenge_history.append(c)
 
-            self.current_challenge = self.generate_new_challenge(challenge_history)
+            if len(challenge_history) > 0:
+                self.last_solution_hash = challenge_history[-1].hash
+
+            self.current_challenge = self.generate_new_challenge()
             challenge_history.append(self.current_challenge)
 
             self.current_challenge.status = Challenge.InProgress
@@ -78,53 +81,50 @@ class ChallengeThread(threading.Thread):
                 ca_private_key = self.central_authority_server.ca_private_key
                 for submission in submissions:
                     if submission.submitted_on < self.current_challenge.expiration():
-                        if submission.hash.startswith(self.current_challenge.hash_prefix):
-                            # winning submission !
-                            # verify the solution
-                            generator = None
-                            for g in self.generators:
-                                if g.problem_name == self.current_challenge.challenge_name:
-                                    generator = g
 
-                            solution = generator.generate_solution(self.previous_challenge, submission.nonce)
+                        # winning submission !
+                        # verify the solution
+                        generator = None
+                        for g in self.generators:
+                            if g.problem_name == self.current_challenge.challenge_name:
+                                generator = g
 
-                            if solution.hash == submission.hash:
-                                # we got a solution
-                                print("Solution valid Original Nonce:{0}  Solution Nonce:{1}".format(self.current_challenge.nonce, solution.nonce))
+                        solution = generator.generate_solution(self.last_solution_hash, submission.nonce)
 
-                                self.current_challenge.hash = solution.hash
-                                self.current_challenge.solution_string = solution.solution_string
-                                self.current_challenge.nonce = solution.nonce
+                        if solution.hash.startswith(self.current_challenge.hash_prefix):
+                            # we got a solution
+                            print("Solution valid Original Nonce:{0}  Solution Nonce:{1}".format(self.current_challenge.nonce, solution.nonce))
 
-                                self.database.update_solution(self.current_challenge)
+                            self.current_challenge.hash = solution.hash
+                            self.current_challenge.solution_string = solution.solution_string
+                            self.current_challenge.nonce = solution.nonce
 
-                                self.end_challenge()
+                            self.database.update_solution(self.current_challenge)
 
-                                # giving some coins !
-                                coin_value = decimal.Decimal(self.current_challenge.coin_value)
+                            self.end_challenge()
 
-                                recipient_wallet = self.database.get_wallet_by_nid(submission.wallet.nid)
+                            # giving some coins !
+                            coin_value = decimal.Decimal(self.current_challenge.coin_value)
 
-                                txn = Transaction.Transaction(0, authority_wallet.id, recipient_wallet.id, coin_value)
-                                txn.sign_with(ca_private_key)
+                            recipient_wallet = self.database.get_wallet_by_nid(submission.wallet.nid)
 
-                                print("{0} + {1:.5f} Coins".format(recipient_wallet.id, coin_value))
-                                self.database.create_transaction(txn)
+                            txn = Transaction.Transaction(0, authority_wallet.id, recipient_wallet.id, coin_value)
+                            txn.sign_with(ca_private_key)
 
-                                authority_wallet.balance -= coin_value
-                                recipient_wallet.balance += coin_value
+                            print("{0} + {1:.5f} Coins".format(recipient_wallet.id, coin_value))
+                            self.database.create_transaction(txn)
 
-                                self.database.update_wallet_balance(recipient_wallet)
+                            authority_wallet.balance -= coin_value
+                            recipient_wallet.balance += coin_value
 
-                                self.next_challenge()
+                            self.database.update_wallet_balance(recipient_wallet)
 
-                                # distribution = Distribution.Distribution(submission.id, self.current_challenge.id, coin_value, recipient_alias.str(), recipient_wallet.nid)
-                                # self.database.create_distribution(distribution)
+                            self.next_challenge()
 
-                                break
-                            else:
-                                print("Invalid submission from {0}, deleting from Database".format(submission.wallet.id))
-                                self.database.delete_submission(submission)
+                            break
+                        else:
+                            print("Invalid submission from {0}, deleting from Database".format(submission.wallet.id))
+                            self.database.delete_submission(submission)
                     else:
                         print("Submission #{0} has a timestamp before the current challenge!".format(submission.id))
 
@@ -134,6 +134,7 @@ class ChallengeThread(threading.Thread):
     def end_challenge(self):
         last_challenge = self.current_challenge
         last_challenge.status = Challenge.Ended
+        self.last_solution_hash = last_challenge.hash
         self.database.update_challenge(last_challenge)
         self.previous_challenge.append(last_challenge)
 
@@ -143,14 +144,14 @@ class ChallengeThread(threading.Thread):
         if len(created_challenges) > 0:
             new_challenge = created_challenges[0]
         else:
-            new_challenge = self.generate_new_challenge(self.previous_challenge)
+            new_challenge = self.generate_new_challenge()
 
         new_challenge.status = Challenge.InProgress
         new_challenge.started_on = int(time.time())
         self.database.update_challenge(new_challenge)
         self.current_challenge = new_challenge
 
-    def generate_new_challenge(self, last_challenges=[]):
+    def generate_new_challenge(self):
         # reload server config file
         self.central_authority_server.read_vars_from_config()
 
@@ -161,7 +162,7 @@ class ChallengeThread(threading.Thread):
                 generator = g
                 break
 
-        new_challenge = generator.generate(last_challenges)
+        new_challenge = generator.generate(self.last_solution_hash)
         # reload server config file
         self.central_authority_server.read_vars_from_config()
         new_challenge.duration = self.central_authority_server.minutes_per_challenge
