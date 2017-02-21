@@ -64,7 +64,7 @@ This is the first challenge of the blockchain, so the last solution hash is `"0.
 
 So we hash `"00000000000000000000000000000000000000000000000000000000000000000"` (`'0'` x 65). Which give us the hex digest: `e531ef0f962409170917abf9de3287afec23dd1c42c9e1fea66c5feab99e8f7c`.
 
-We use the last 8 bytes to generate an integer, this integer will be our seed number. `"\xe5\x31\xef\x0f\96\x24\x09\x17"` or `0x170924960fef31e5` as an unsigned 64 bits integer.
+We use the first 8 bytes to generate an integer, this integer will be our seed number. `"\xe5\x31\xef\x0f\96\x24\x09\x17"` or `0x170924960fef31e5` as an unsigned 64 bits integer.
 
 With the seeded Mersenne Twister PRNG, generate 20 unsigned 64 bits random integer:
 ```json
