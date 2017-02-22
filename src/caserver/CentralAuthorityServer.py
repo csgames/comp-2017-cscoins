@@ -23,6 +23,7 @@ class ClientConnection:
         self.status = status
         self.authenticated = False
         self.wallet = None
+        self.messages_to_push = []
 
     def get_remote_ip(self):
         return self.websocket.remote_address[0]
@@ -39,7 +40,6 @@ class CentralAuthorityServer(object):
         self.clients = []
         self.ca_name = "unnamed"
         self.transactions = []
-        self.current_transaction_id = 0
         self.coins_per_challenge = 0
         self.minutes_per_challenge = 0
         self.ssl_on = True
@@ -130,6 +130,13 @@ class CentralAuthorityServer(object):
         self.clients.append(client_connection)
 
         while not client_connection.status == ClientConnection.Closed:
+            # messages pending to be push to the client
+            if len(client_connection.messages_to_push) > 0:
+                for m in client_connection.messages_to_push:
+                    await websocket.send(m)
+
+                client_connection.messages_to_push = []
+
             message = await websocket.recv()
             command_obj = json.JSONDecoder().decode(message)
 
@@ -150,6 +157,7 @@ class CentralAuthorityServer(object):
                 if client_connection.status == ClientConnection.Closing:
                     await websocket.close()
                     client_connection.status == ClientConnection.Closed
+                    self.clients.remove(client_connection)
 
                 await websocket.send(response)
 
@@ -157,6 +165,7 @@ class CentralAuthorityServer(object):
                 print("Error occurred ({0}) closing connection".format(e))
                 websocket.close()
                 client_connection.status = ClientConnection.Closed
+                self.clients.remove(client_connection)
                 break
 
             await asyncio.sleep(0.5)
@@ -172,6 +181,10 @@ class CentralAuthorityServer(object):
                 websocket.close()
         except Exception as e:
             print("Error occured with connection {0}:{1}, {2}".format(remote_addr[0], remote_addr[1], e))
+
+    def push_message_to_all(self, message):
+        for c in self.clients:
+            c.messages_to_push.append(message)
 
     def initialize(self):
         if not os.path.exists('ca_key.priv') and not os.path.exists('ca_key.pub'):

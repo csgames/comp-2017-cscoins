@@ -78,6 +78,14 @@ class BaseClient:
 
         print("Submission result: {0}".format(response))
 
+        if 'challenge_name' in response:
+            # we got a new challenge
+            challenge = Challenge()
+            challenge.fill_from_challenge(response)
+
+            return challenge
+        return None
+
     async def get_challenge_solution(self, challenge_id):
         command = {'command': 'get_challenge_solution', 'args': {'challenge_id': challenge_id}}
         message = json.dumps(command)

@@ -1,11 +1,18 @@
 from coinslib import MT64, seed_from_hash
 import hashlib
 import random
+import threading
 
-class ChallengeSolver:
-    def __init__(self, challenge_name):
+
+class ChallengeSolver(threading.Thread):
+    def __init__(self, challenge_name, challenge):
+        threading.Thread.__init__(self)
         self.challenge_name = challenge_name
         self.mt = None
+        self.alive = True
+        self.solution_found = False
+        self.solution = ()
+        self.challenge = challenge
 
     def feed_prng(self, previous_hash, nonce):
         hasher = hashlib.sha256()
@@ -18,17 +25,21 @@ class ChallengeSolver:
     def solve(self, parameters, hash_prefix, previous_hash):
         pass
 
+    def run(self):
+        self.solution = self.solve(self.challenge.parameters, self.challenge.hash_prefix, self.challenge.last_solution_hash)
+        self.solution_found = True
+
 
 class SortedListSolver(ChallengeSolver):
-    def __init__(self):
-        ChallengeSolver.__init__(self, 'sorted_list')
+    def __init__(self, challenge):
+        ChallengeSolver.__init__(self, 'sorted_list', challenge)
 
     def solve(self, parameters, hash_prefix, previous_hash):
         nb_elements = parameters['nb_elements']
 
         nonce = random.randint(0, 99999999)
 
-        while True:
+        while self.alive:
             self.feed_prng(previous_hash, nonce)
 
             elements = []
@@ -52,17 +63,16 @@ class SortedListSolver(ChallengeSolver):
 
             nonce = random.randint(0, 99999999)
 
-
 class ReverseSortedListSolver(ChallengeSolver):
-    def __init__(self):
-        ChallengeSolver.__init__(self, 'reverse_sorted_list')
+    def __init__(self, challenge):
+        ChallengeSolver.__init__(self, 'reverse_sorted_list', challenge)
 
     def solve(self, parameters, hash_prefix, previous_hash):
         nb_elements = parameters['nb_elements']
 
         nonce = random.randint(0, 99999999)
 
-        while True:
+        while self.alive:
             self.feed_prng(previous_hash, nonce)
 
             elements = []
@@ -85,3 +95,4 @@ class ReverseSortedListSolver(ChallengeSolver):
                 return solution_hash, nonce
 
             nonce = random.randint(0, 99999999)
+

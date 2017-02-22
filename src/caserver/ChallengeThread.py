@@ -4,6 +4,8 @@ import random
 import time
 import decimal
 import Transaction
+import commands
+import json
 import Distribution
 from Crypto.PublicKey import RSA
 
@@ -18,6 +20,7 @@ class ChallengeThread(threading.Thread):
         self.generators = []
         self.alive = True
         self.last_solution_hash = "0" * 64
+        self.current_challenge_command = commands.GetCurrentChallengeCommand(central_authority_server)
         self.__init_generators()
         self.__init_challenges()
 
@@ -150,6 +153,11 @@ class ChallengeThread(threading.Thread):
         new_challenge.started_on = int(time.time())
         self.database.update_challenge(new_challenge)
         self.current_challenge = new_challenge
+
+        # pushing new challenge message
+        challenge_message = {}
+        self.current_challenge_command.execute(challenge_message, None, None)
+        self.central_authority_server.push_message_to_all(json.dumps(challenge_message))
 
     def generate_new_challenge(self):
         # reload server config file
