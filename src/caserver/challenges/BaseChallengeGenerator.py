@@ -12,7 +12,7 @@ class BaseChallengeGenerator:
 
     def read_nonce_limit(self):
         self.nonce_min = self.config_file.get_int('challenge.nonce_min', 0)
-        self.nonce_max = self.config_file.get_int('challenge.nonce_min', 99999999)
+        self.nonce_max = self.config_file.get_int('challenge.nonce_max', 99999999)
 
     def read_parameters(self):
         pass
