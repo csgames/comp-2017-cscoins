@@ -42,24 +42,7 @@ class MinerClient(BaseClient):
         await self.connect()
 
         if register_wallet:
-            # create the wallet
-            keyString = ""
-            for b in self.public_key.exportKey(format='PEM'):
-                keyString += chr(b)
-
-            hasher = SHA256.new()
-            hasher.update(self.public_key.exportKey(format='DER'))
-            signature = self.sign_message(hasher)
-
-            command = {"command": "register_wallet", "args": {"name": 'miner_wallet', "key": keyString, "signature": signature}}
-            message = json.dumps(command)
-            await self.socket.send(message)
-            message = await self.socket.recv()
-            response = json.loads(message)
-
-            if response['wallet_id']:
-                print("Wallet created : {}".format(response["wallet_id"]))
-                return
+            await self.register_wallet()
 
         await self.mine_loop()
 

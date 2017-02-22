@@ -19,6 +19,7 @@ class BaseClient:
         self.public_key = None
         self.private_key = None
         self.wallet_id = ""
+        self.wallet_name = ""
 
     def sign_message(self, digest):
         signer = PKCS1_v1_5.new(self.private_key)
@@ -78,6 +79,9 @@ class BaseClient:
 
         print("Submission result: {0}".format(response))
 
+        if 'error' in response:
+            print("Error during submission : {0}".format(response["error"]))
+
         if 'challenge_name' in response:
             # we got a new challenge
             challenge = Challenge()
@@ -132,10 +136,36 @@ class BaseClient:
         await self.socket.send(message)
 
         message = await self.socket.recv()
-        data = json.loads(message)
+        response = json.loads(message)
 
-        if data['response']:
-            return data['id']
+        if 'error' in response:
+            print("Error during create_transaction : {0}".format(response['error']))
+
+        if 'id' in response:
+            return response['id']
 
         return None
+
+    async def register_wallet(self):
+        # create the wallet
+        keyString = ""
+        for b in self.public_key.exportKey(format='PEM'):
+            keyString += chr(b)
+
+        hasher = SHA256.new()
+        hasher.update(self.public_key.exportKey(format='DER'))
+        signature = self.sign_message(hasher)
+
+        command = {"command": "register_wallet", "args": {"name": self.wallet_name, "key": keyString, "signature": signature}}
+        message = json.dumps(command)
+        await self.socket.send(message)
+        message = await self.socket.recv()
+        response = json.loads(message)
+
+        if 'error' in response:
+            print("Error during register_wallet : {0}".format(response['error']))
+
+        if 'wallet_id' in response:
+            print("Wallet created : {}".format(response["wallet_id"]))
+            return
 
