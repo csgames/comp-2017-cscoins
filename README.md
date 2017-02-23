@@ -211,8 +211,6 @@ We are using RSA digital signature protocol according to PKCS#1 v1.5. Some messa
 
 The Central Authority Server use the [WebSocket protocol](https://en.wikipedia.org/wiki/WebSocket) to communicate. The server URI is [wss://cscoins.2017.csgames.org:8989/client](wss://cscoins.2017.csgames.org:8989/client). Once a client is connected, the server will be waiting for any incoming commands. All data sent or received are serialized in JSON.
 
-The Central Authority Server will push you a [get_challenge_solution](#get-challenge-solution-command) Response when a new challenge is generated. So no need to call that command at each second. We will inform you when a new challenge is available.
-
 ### Available commands
 
 *   [get_current_challenge](#get-current-challenge-command)
@@ -233,7 +231,9 @@ The Central Authority Server will push you a [get_challenge_solution](#get-chall
 
 #### Get Current Challenge
 
-Fetch the current problem set from the Central Authority
+Fetch the current problem set from the Central Authority. 
+
+After the first call of this command, you will automatically receive the new challenge when it's available, until the connection is close.
 
 **Command Name:** get_current_challenge
 

@@ -103,7 +103,7 @@ class MinerClient(BaseClient):
                         current_challenge = result
                         new_challenge = True
                     else:
-                        done_recv, pending_recv = await asyncio.wait([recv_task], return_when=asyncio.FIRST_COMPLETED)
+                        await asyncio.wait([recv_task], return_when=asyncio.FIRST_COMPLETED)
                         challenge = recv_task.result()
                         if challenge is not None:
                             new_challenge = True

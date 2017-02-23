@@ -23,6 +23,7 @@ class ClientConnection:
         self.status = status
         self.authenticated = False
         self.wallet = None
+        self.is_miner = False
         self.messages_to_push = []
 
     def get_remote_ip(self):
@@ -73,7 +74,6 @@ class CentralAuthorityServer(object):
         self.ssl_cert = self.config_file.get_string('ssl_cert', '../server.pem')
 
         self.ca_name = self.config_file.get_string('ca_name', 'CS Games Coin Authority')
-        self.aliases_per_wallet = self.config_file.get_int('aliases_per_wallet', 25)
 
         self.coins_per_challenge = self.config_file.get_decimal('coins_per_challenge', 10)
         self.minutes_per_challenge = self.config_file.get_decimal('minutes_per_challenge', 15)
@@ -182,9 +182,10 @@ class CentralAuthorityServer(object):
         except Exception as e:
             print("Error occured with connection {0}:{1}, {2}".format(remote_addr[0], remote_addr[1], e))
 
-    def push_message_to_all(self, message):
+    def push_message_to_miners(self, message):
         for c in self.clients:
-            c.messages_to_push.append(message)
+            if c.is_miner:
+                c.messages_to_push.append(message)
 
     def initialize(self):
         if not os.path.exists('ca_key.priv') and not os.path.exists('ca_key.pub'):

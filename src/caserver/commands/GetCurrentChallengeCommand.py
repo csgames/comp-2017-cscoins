@@ -12,6 +12,10 @@ class GetCurrentChallengeCommand(BaseCommand):
         current_challenge = self.database.get_current_challenge()
         last_solution = self.database.get_challenge_by_id(current_challenge.id - 1, Challenge.Ended)
 
+        # subscribing to new challenge message push
+        if client_connection is not None:
+            client_connection.is_miner = True
+
         if current_challenge:
             timestamp = int(time.time())
             response['challenge_id'] = current_challenge.id

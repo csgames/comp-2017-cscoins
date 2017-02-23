@@ -157,7 +157,7 @@ class ChallengeThread(threading.Thread):
         # pushing new challenge message
         challenge_message = {}
         self.current_challenge_command.execute(challenge_message, None, None)
-        self.central_authority_server.push_message_to_all(json.dumps(challenge_message))
+        self.central_authority_server.push_message_to_miners(json.dumps(challenge_message))
 
     def generate_new_challenge(self):
         # reload server config file
