@@ -233,7 +233,7 @@ The Central Authority Server use the [WebSocket protocol](https://en.wikipedia.o
 
 Fetch the current problem set from the Central Authority. 
 
-After the first call of this command, you will automatically receive the new challenge when it's available, until the connection is close.
+After the first call of this command, you will automatically receive the new challenge when it's available, until the connection is closed.
 
 **Command Name:** get_current_challenge
 
