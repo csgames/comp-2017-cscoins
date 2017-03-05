@@ -96,13 +96,14 @@ def reconstruct_path(came_from, start_pos, end_pos):
 class ShortestPathChallenge(BaseChallengeGenerator):
     def __init__(self, config_file):
         BaseChallengeGenerator.__init__(self, 'shortest_path', config_file)
+        self.debug_output = False
         self.read_parameters()
 
     def read_parameters(self):
         self.config_file.read_file()
         self.parameters["grid_size"] = self.config_file.get_int('shortest_path.grid_size', 100)
         self.parameters["nb_blockers"] = self.config_file.get_int('shortest_path.nb_blockers', 5000)
-        self.parameters["debug_output"] = self.config_file.get_bool('shortest_path.debug_output', False)
+        self.debug_output = self.config_file.get_bool('shortest_path.debug_output', False)
         self.read_nonce_limit()
 
     def save_grid(self, grid, start_pos, end_pos, nonce, path):
@@ -138,6 +139,8 @@ class ShortestPathChallenge(BaseChallengeGenerator):
 
     def generate_solution(self, previous_hash, nonce):
         solution_string = ""
+
+
         grid = Grid(self.parameters["grid_size"])
         seed_hash = self.generate_seed_hash(previous_hash, nonce)
         # seed is the last solution hash suffix, else it's 0
@@ -161,15 +164,16 @@ class ShortestPathChallenge(BaseChallengeGenerator):
             block_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
             if block_pos != start_pos and block_pos != end_pos:
                 grid.walls.append(block_pos)
+
         path = []
 
         came_from, cost_so_far = dijkstra_search(grid, start_pos, end_pos)
         path = reconstruct_path(came_from, start_pos, end_pos)
-        # print(path)
+
         for coord in path:
             solution_string += "{0}{1}".format(coord[0], coord[1])
 
-        if self.parameters["debug_output"]:
+        if self.debug_output:
             self.save_grid(grid, start_pos, end_pos, nonce, path)
 
         hash = self.generate_hash(solution_string)

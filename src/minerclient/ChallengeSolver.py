@@ -107,7 +107,7 @@ class ShortestPathSolver(ChallengeSolver):
         grid_size = parameters['grid_size']
 
         while self.alive:
-            nonce = random.randint(0, 99999999)
+            nonce = random.randint(0, 9999999999)
             self.feed_prng(previous_hash, nonce)
 
             grid = Grid.Grid(grid_size)
@@ -150,6 +150,5 @@ class ShortestPathSolver(ChallengeSolver):
                     return solution_hash, nonce
 
             except Exception as e:
-                print("Shortest Path Challenge error: {0}".format(e))
-                print("No solution exists, trying with another nonce")
-                # No solution exists, so solution string should be empty
+                # No solution exists
+                pass

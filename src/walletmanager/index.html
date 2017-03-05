@@ -1,0 +1,58 @@
+<html>
+	<head>
+		<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+		<script type="text/javascript" src="libs/sha256.js"></script>
+		<script type="text/javascript" src="libs/header.js"></script>  
+		<script type="text/javascript" src="libs/jsrsasign.js"></script>
+		<script type="text/javascript" src="libs/footer.js"></script> 
+		<title>CS Coins Wallet</title>
+	</head>
+	<body onload="init_page();">
+		<div id="connection-status">
+		</div>
+		<div id="job-status">
+		</div>
+		<div id="wallet-information">
+			<div id="wallet-form">
+				<div id="wallet-public-key-field" class="key-field">
+					<label>Wallet Public Key (PEM Format)</label>
+					<textarea id="wallet-public-key" class="key-control"></textarea>
+				</div>
+				<div id="wallet-private-key-field">
+					<label>Wallet Private Key (PEM Format)</label>
+					<textarea id="wallet-private-key" class="key-control"></textarea>
+				</div>
+				<button id="hide-wallet-keys-btn" onclick="hideKeys();">Hide Keys</button>
+			</div>
+			<button onclick="generateWalletId();">Generate Wallet Id</button>
+			<button id="show-wallet-keys-btn" onclick="showKeys();">Show Keys</button>
+			<div id="wallet-id-section">
+				Wallet Id : <span id="wallet-id"></span>
+			</div>
+			<div id="wallet-balance-section">
+				Balance : <span id="wallet-balance"></span><br/>
+				<button onclick="calculateBalance();">Calculate Wallet Balance</button>
+			</div>
+		</div>
+		<div id="send-coins-toggle">
+			<button onclick="toggleSendCoins();">Send coins...</button>
+		</div>
+		<div id="send-coins-section" class="hideable" data-state="hidden">
+			<div id="recipient-field">
+				<label>Recipient</label>
+				<input type="text" id="transaction-recipient" placeholder="Recipient Wallet Id">
+			</div>
+			<div id="amount-field">
+				<label>Amount</label>
+				<input type="text" id="transaction-amount" placeholder="0.00000">
+			</div>
+			<button onclick="send_coins();">Send</button>
+			<div id="transaction-information">
+			</div>
+		</div>
+		<button onclick="showHideTransactions();">Show/Hide transaction</button>
+		<div id="transactions-section" class="hideable" data-state="hidden">
+		</div>
+		<script text="text/javascript" src="coins-client.js"></script>
+	</body>
+</html>

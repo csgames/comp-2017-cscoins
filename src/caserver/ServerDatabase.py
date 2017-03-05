@@ -49,7 +49,7 @@ class ServerDatabase:
                         `challenge_id` INT NOT NULL AUTO_INCREMENT,
                         `challenge_name` VARCHAR(255) NOT NULL,
                         `solution_string` LONGTEXT NOT NULL,
-                        `nonce` INT NOT NULL,
+                        `nonce` BIGINT NOT NULL,
                         `coin_value` INT NOT NULL,
                         `hash` varchar(64) NOT NULL,
                         `parameters` TEXT NOT NULL,
@@ -63,7 +63,7 @@ class ServerDatabase:
         cur.execute("""CREATE TABLE IF NOT EXISTS `submissions` (
                         `submission_id` INT NOT NULL AUTO_INCREMENT,
                         `challenge_id` INT NOT NULL,
-                        `nonce` INT NOT NULL,
+                        `nonce` BIGINT NOT NULL,
                         `hash` varchar(64),
                         `wallet_nid` INT NOT NULL,
                         `submitted_on` INT NULL,
