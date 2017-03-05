@@ -214,14 +214,23 @@ You need to find the optimal path in a Grid. You can only go up, down, right and
 **Example**: We got a grid of size 10 with 5 blockers, "x" is a blocker, "s" is the starting point, "e" is the ending point and "p" is the path.
 
 > xxxxxxxxxx
+
 > x        x
+
 > xsx      x
+
 > xpp x    x
+
 > x p  x   x
+
 > x pex    x
+
 > x    x   x
+
 > x        x
+
 > x        x
+
 > xxxxxxxxxx
 
 The solution path is `[(2, 1), (3, 1), (3, 2), (4, 3), (5, 3), (5, 4)]`. The solution string would be `"213132435354"`.
