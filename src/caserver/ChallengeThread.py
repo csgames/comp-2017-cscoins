@@ -27,6 +27,7 @@ class ChallengeThread(threading.Thread):
     def __init_generators(self):
         self.generators.append(ReverseSortedListChallenge(self.central_authority_server.config_file))
         self.generators.append(SortedListChallenge(self.central_authority_server.config_file))
+        self.generators.append(ShortestPathChallenge(self.central_authority_server.config_file))
 
     def __init_challenges(self):
         # loading challenges
@@ -92,7 +93,12 @@ class ChallengeThread(threading.Thread):
                             if g.problem_name == self.current_challenge.challenge_name:
                                 generator = g
 
-                        solution = generator.generate_solution(self.last_solution_hash, submission.nonce)
+                        try:
+                            solution = generator.generate_solution(self.last_solution_hash, submission.nonce)
+                        except:
+                            print("Invalid submission from {0}, deleting from Database".format(submission.wallet.id))
+                            self.database.delete_submission(submission)
+                            continue
 
                         if solution.hash.startswith(self.current_challenge.hash_prefix):
                             # we got a solution

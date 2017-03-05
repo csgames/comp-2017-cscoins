@@ -2,10 +2,8 @@ import json
 import os
 import ChallengeSolver
 import time
-from Crypto.Hash import SHA256
 from coinslib import BaseClient
 from coinslib import Challenge
-import websockets
 import asyncio
 
 class MinerClient(BaseClient):
@@ -16,6 +14,7 @@ class MinerClient(BaseClient):
         self.solvers = {}
         self.solvers["sorted_list"] = ChallengeSolver.SortedListSolver
         self.solvers["reverse_sorted_list"] = ChallengeSolver.ReverseSortedListSolver
+        self.solvers["shortest_path"] = ChallengeSolver.ShortestPathSolver
 
         self.solving_thread = None
 

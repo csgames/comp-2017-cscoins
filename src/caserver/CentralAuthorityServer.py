@@ -47,7 +47,6 @@ class CentralAuthorityServer(object):
         self.ssl_cert = ""
         self.available_challenges = []
         self.prefix_length = 4
-
         self.challenge_thread = None
 
         self.min_transaction_amount = 0
