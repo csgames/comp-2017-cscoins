@@ -209,8 +209,22 @@ You need to find the optimal path in a Grid. You can only go up, down, right and
  - First, we generate a starting coordinate with the PRNG. (PRNG.extract_number % grid_size, PRNG.extract_number % grid_size)
  - We generate an ending coordinate, same as the starting coordinate.
  - Place some walls at each border tiles. (First row, last row, first column and last column)
- - Generate *nb_blockers* walls with the PRNG (PRNG.extract_number % grid_size, PRNG.extract_number % grid_size), if the coordinate is the same as the starting coord or the ending coord, skip this blockers.
+ - Generate **nb_blockers** walls with the PRNG (PRNG.extract_number % grid_size, PRNG.extract_number % grid_size), if the coordinate is the same as the starting coord or the ending coord, skip this blockers.
 
+**Example**: We got a grid of size 10 with 5 blockers, "x" is a blocker, "s" is the starting point, "e" is the ending point and "p" is the path.
+
+> xxxxxxxxxx
+> x        x
+> xsx      x
+> xpp x    x
+> x p  x   x
+> x pex    x
+> x    x   x
+> x        x
+> x        x
+> xxxxxxxxxx
+
+The solution path is `[(2, 1), (3, 1), (3, 2), (4, 3), (5, 3), (5, 4)]`. The solution string would be `"213132435354"`.
 
 ## Wallet
 
