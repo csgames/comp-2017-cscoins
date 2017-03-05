@@ -193,6 +193,25 @@ Just like the Sorted List challenge, this challenge begins by generating 64 bits
 
 **Example**: Given the numbers `[400, 2, 4, 3, 5]`, the solution string would be `"4005432"`.
 
+### Shortest Path
+
+You need to find the optimal path in a Grid. You can only go up, down, right and left.
+
+**Challenge Name**: `shortest_path`
+**Parameters**:
+ * **grid_size**: Grid size, the grid is square.
+ * **nb_blockers**: Numbers of blocker tile in the grid.
+
+**Solution String Formatting**: Join all coordinates of the path, a coordinate is the row and the column in decimal string representation. Including starting and ending coordinate.
+
+#### Grid generation
+
+ - First, we generate a starting coordinate with the PRNG. (PRNG.extract_number % grid_size, PRNG.extract_number % grid_size)
+ - We generate an ending coordinate, same as the starting coordinate.
+ - Place some walls at each border tiles. (First row, last row, first column and last column)
+ - Generate *nb_blockers* walls with the PRNG (PRNG.extract_number % grid_size, PRNG.extract_number % grid_size), if the coordinate is the same as the starting coord or the ending coord, skip this blockers.
+
+
 ## Wallet
 
 A wallet is a RSA key pair of 1024 bits. To send or receive coins, we use the Wallet Id. The Wallet Id is a SHA256 Hash of a client public key in DER ([Distinguished Encoding Rules](https://en.wikipedia.org/wiki/X.690#DER_encoding)) format.
