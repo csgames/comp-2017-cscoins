@@ -31,6 +31,6 @@ class GetCurrentChallengeCommand(BaseCommand):
             if time_left < 0:
                 time_left = 0
 
-            response['time_left'] = "{0}".format(time_left)
+            response['time_left'] = time_left
         else:
             return
