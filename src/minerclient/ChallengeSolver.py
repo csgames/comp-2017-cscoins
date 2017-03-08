@@ -64,6 +64,7 @@ class SortedListSolver(ChallengeSolver):
 
             nonce = random.randint(0, 99999999)
 
+
 class ReverseSortedListSolver(ChallengeSolver):
     def __init__(self, challenge):
         ChallengeSolver.__init__(self, 'reverse_sorted_list', challenge)
@@ -137,6 +138,7 @@ class ShortestPathSolver(ChallengeSolver):
             try:
                 came_from, cost_so_far = Grid.dijkstra_search(grid, start_pos, end_pos)
                 path = Grid.reconstruct_path(came_from, start_pos, end_pos)
+
                 for coord in path:
                     solution_string += "{0}{1}".format(coord[0], coord[1])
 

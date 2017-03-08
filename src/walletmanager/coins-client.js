@@ -121,6 +121,11 @@ var coinsClient = {
 			},
 
 			function(job, data) {
+				if (data.error) {
+					console.log(data.error);
+					return;
+				}
+				
 				for(var i=0; i<data.transactions.length; i++)
 				{
 				    addTransactionToUI(data.transactions[i]);

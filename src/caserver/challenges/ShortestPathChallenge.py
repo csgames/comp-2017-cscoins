@@ -101,8 +101,8 @@ class ShortestPathChallenge(BaseChallengeGenerator):
 
     def read_parameters(self):
         self.config_file.read_file()
-        self.parameters["grid_size"] = self.config_file.get_int('shortest_path.grid_size', 100)
-        self.parameters["nb_blockers"] = self.config_file.get_int('shortest_path.nb_blockers', 5000)
+        self.parameters["grid_size"] = self.config_file.get_int('shortest_path.grid_size', 25)
+        self.parameters["nb_blockers"] = self.config_file.get_int('shortest_path.nb_blockers', 150)
         self.debug_output = self.config_file.get_bool('shortest_path.debug_output', False)
         self.read_nonce_limit()
 
@@ -129,23 +129,26 @@ class ShortestPathChallenge(BaseChallengeGenerator):
 
     def generate(self, previous_hash):
         self.read_parameters()
+        solution = None
         while True:
             nonce = random.randint(self.nonce_min, self.nonce_max)
             print("Generating {0} problem nonce = {1}".format(self.problem_name, nonce))
             try:
-                return self.generate_solution(previous_hash, nonce)
+                solution = self.generate_solution(previous_hash, nonce)
+                break
             except Exception as e:
                 print("No solution exists with nonce = {0}".format(nonce))
 
+        return solution
+
     def generate_solution(self, previous_hash, nonce):
         solution_string = ""
-
 
         grid = Grid(self.parameters["grid_size"])
         seed_hash = self.generate_seed_hash(previous_hash, nonce)
         # seed is the last solution hash suffix, else it's 0
         prng = coinslib.MT64(coinslib.seed_from_hash(seed_hash))
-
+        # todo, if start_pos or end_pos, generate another coord
         start_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
         end_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
 

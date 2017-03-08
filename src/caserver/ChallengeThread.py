@@ -7,6 +7,7 @@ import Transaction
 import commands
 import json
 import Distribution
+import RequestControl
 from Crypto.PublicKey import RSA
 
 
@@ -83,20 +84,22 @@ class ChallengeThread(threading.Thread):
                 submissions = self.database.get_submissions(self.current_challenge.id)
                 authority_wallet = self.database.get_wallet_by_nid(self.central_authority_server.authority_wallet.nid)
                 ca_private_key = self.central_authority_server.ca_private_key
+                generator = None
+                for g in self.generators:
+                    if g.problem_name == self.current_challenge.challenge_name:
+                        generator = g
+
                 for submission in submissions:
                     if submission.submitted_on < self.current_challenge.expiration():
 
-                        # winning submission !
+                        # maybe a winning submission !
                         # verify the solution
-                        generator = None
-                        for g in self.generators:
-                            if g.problem_name == self.current_challenge.challenge_name:
-                                generator = g
 
                         try:
                             solution = generator.generate_solution(self.last_solution_hash, submission.nonce)
                         except:
                             print("Invalid submission from {0}, deleting from Database".format(submission.wallet.id))
+                            self.add_invalid_submission(submission)
                             self.database.delete_submission(submission)
                             continue
 
@@ -133,12 +136,30 @@ class ChallengeThread(threading.Thread):
                             break
                         else:
                             print("Invalid submission from {0}, deleting from Database".format(submission.wallet.id))
+                            self.add_invalid_submission(submission)
                             self.database.delete_submission(submission)
                     else:
                         print("Submission #{0} has a timestamp before the current challenge!".format(submission.id))
 
                 self.database.update_wallet_balance(authority_wallet)
             time.sleep(0.2)
+
+    def add_invalid_submission(self, submission):
+        invalid_submission = RequestControl.InvalidSubmission(submission.remote_ip, submission.wallet.nid)
+        self.database.add_invalid_submission(invalid_submission)
+
+        # fetching the invalid_submission_count
+        invalid_submission_count = self.database.get_invalid_submission_count(submission.remote_ip)
+        if invalid_submission_count >= self.central_authority_server.invalid_submission_allowed:
+            # add a client cooldown
+            cooldown_length = self.central_authority_server.initial_cooldown_length
+            last_cooldown = self.database.get_lastest_client_cooldown(submission.remote_ip)
+            if last_cooldown is not None:
+                cooldown_length = last_cooldown.length * 2
+
+            client_cooldown = RequestControl.ClientCooldown(submission.remote_ip, cooldown_length)
+            self.database.add_client_cooldown(client_cooldown)
+            print("Client {0} has been put on a cooldown for {1} minutes (Too much invalid submissions)".format(submission.remote_ip, int(cooldown_length / 60)))
 
     def end_challenge(self):
         last_challenge = self.current_challenge
