@@ -1,57 +1,100 @@
 <html>
 	<head>
-		<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+		<script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
+		<script type="text/javascript" src="js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="libs/sha256.js"></script>
 		<script type="text/javascript" src="libs/header.js"></script>  
 		<script type="text/javascript" src="libs/jsrsasign.js"></script>
 		<script type="text/javascript" src="libs/footer.js"></script> 
-		<title>CS Coins Wallet</title>
+		<link rel="stylesheet" href="css/bootstrap.min.css" />
+		<link rel="stylesheet" href="css/style.css" />
+		<title>CS Coins Wallet Manager</title>
 	</head>
 	<body onload="init_page();">
-		<div id="connection-status">
-		</div>
-		<div id="job-status">
-		</div>
-		<div id="wallet-information">
-			<div id="wallet-form">
-				<div id="wallet-public-key-field" class="key-field">
-					<label>Wallet Public Key (PEM Format)</label>
-					<textarea id="wallet-public-key" class="key-control"></textarea>
+		<div class="container">
+			<div id="connection-status" class="row section">
+				<span id="connection-status-pending" class="label label-primary hideable">Connecting to Central Authority Server...</span>
+				<span id="connection-status-connected" class="label label-success hideable" data-state="hidden">Connected</span>
+				<span id="connection-status-disconnected" class="label label-danger hideable" data-state="hidden">Disconnected</span>
+			</div>
+			<div id="job-status" class="row">
+			</div>
+			<div id="wallet-information" class="row">
+				<div id="wallet-keys-form">
+					<div id="wallet-public-key-field" class="key-field">
+						<label>Wallet Public Key (PEM Format)</label><br/>
+						<textarea id="wallet-public-key" class="key-control" cols="50" rows="8"></textarea>
+					</div>
+					<div id="wallet-private-key-field">
+						<label>Wallet Private Key (PEM Format)</label><br/>
+						<textarea id="wallet-private-key" class="key-control" cols="50" rows="8"></textarea>
+					</div>
+					<button id="generate-keys-btn" onclick="generateKeys();">Generate a new key pair</button>
+					<button id="register-wallet-btn" onclick="registerWallet();">Register Wallet</button>
 				</div>
-				<div id="wallet-private-key-field">
-					<label>Wallet Private Key (PEM Format)</label>
-					<textarea id="wallet-private-key" class="key-control"></textarea>
+				<div id="wallet-keys-toggle">
+					<button id="hide-wallet-keys-btn" onclick="hideKeys();">Hide Wallet Keys</button>
+					<button id="show-wallet-keys-btn" class="hideable" data-state="hidden" onclick="showKeys();">Show Wallet Keys</button>
 				</div>
-				<button id="hide-wallet-keys-btn" onclick="hideKeys();">Hide Keys</button>
+				<button onclick="generateWalletId();">Generate Wallet Id</button>
+				<div id="wallet-id-section">
+					Wallet Id : <span id="wallet-id" class="label label-info"></span>
+				</div>
+				<div id="wallet-balance-section">
+					Balance : <span id="wallet-balance" class="label label-info"></span><br/>
+					<button onclick="calculateBalance();">Calculate Wallet Balance</button>
+				</div>
 			</div>
-			<button onclick="generateWalletId();">Generate Wallet Id</button>
-			<button id="show-wallet-keys-btn" onclick="showKeys();">Show Keys</button>
-			<div id="wallet-id-section">
-				Wallet Id : <span id="wallet-id"></span>
+			<div id="send-coins-toggle" class="row">
+				<button onclick="toggleSendCoins();">Send coins...</button>
 			</div>
-			<div id="wallet-balance-section">
-				Balance : <span id="wallet-balance"></span><br/>
-				<button onclick="calculateBalance();">Calculate Wallet Balance</button>
+			<div id="send-coins-section" class="hideable row" data-state="hidden">
+				<div id="send-coins-form">
+					<div id="recipient-field">
+						<label>Recipient</label>
+						<input type="text" size="96" id="transaction-recipient" placeholder="Recipient Wallet Id">
+					</div>
+					<div id="amount-field">
+						<label>Amount</label>
+						<input type="text" id="transaction-amount" placeholder="0.00000">
+					</div>
+					<button onclick="sendCoins();">Send</button>
+				</div>
+				<div id="transaction-information">
+					<span class="label label-info hideable" data-state="hidden">Transaction creation in progres...</span>
+					<span class="label label-danger hideable" data-state="hidden">Transaction failed : </span>
+					<span class="label label-success hideable" data-state="hidden">Transaction success : </span>
+				</div>
+			</div>
+			<div id="transactions-toggle" class="row">
+				<button onclick="showHideTransactions();">Show/Hide transaction</button>
+			</div>
+			<div id="transactions-section" class="hideable row" data-state="hidden">
+				<div id="transactions-container" class="container">
+					<div id="txn-header" class="row table-header">
+						<div class="col-md-1">Id</div>
+						<div class="col-md-4">Source</div>
+						<div class="col-md-4">Recipient</div>
+						<div class="col-md-3">Amount</div>
+					</div>
+				</div>
 			</div>
 		</div>
-		<div id="send-coins-toggle">
-			<button onclick="toggleSendCoins();">Send coins...</button>
-		</div>
-		<div id="send-coins-section" class="hideable" data-state="hidden">
-			<div id="recipient-field">
-				<label>Recipient</label>
-				<input type="text" id="transaction-recipient" placeholder="Recipient Wallet Id">
+		<div id="template" class="hideable" data-state="hidden">
+			<div id="txn" class="txn row">
+				<div class="col-md-1">
+					<span id="txn-id"></span>
+				</div>
+				<div class="col-md-4">
+					<span id="source-address"></span>
+				</div>
+				<div class="col-md-4">
+					<span id="recipient-address"></span>
+				</div>
+				<div class="col-md-3">
+					<span id="txn-amount"></span> Coin(s)
+				</div>
 			</div>
-			<div id="amount-field">
-				<label>Amount</label>
-				<input type="text" id="transaction-amount" placeholder="0.00000">
-			</div>
-			<button onclick="send_coins();">Send</button>
-			<div id="transaction-information">
-			</div>
-		</div>
-		<button onclick="showHideTransactions();">Show/Hide transaction</button>
-		<div id="transactions-section" class="hideable" data-state="hidden">
 		</div>
 		<script text="text/javascript" src="coins-client.js"></script>
 	</body>

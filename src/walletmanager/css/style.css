@@ -1,0 +1,25 @@
+.section {
+	margin-top: 10px;
+	margin-bottom: 20px;
+}
+
+.table-header {
+	font-weight: bold;
+	border: 1px solid gray;
+	height: 35px;
+}
+
+.txn {
+	border-bottom: 1px solid gray;
+	border-left: 1px solid gray;
+	border-right: 1px solid gray;
+	height: 25px;
+}
+
+.my-wallet-id {
+	background-color: #42adf4;
+	color: white;
+	font-weight: bold;
+	padding: 2px;
+	border-radius: 2px;
+}

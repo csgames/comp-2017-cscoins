@@ -1,7 +1,8 @@
-import MinerClient
-import asyncio
 import sys
 sys.path.append('..')
+
+import MinerClient
+import asyncio
 
 keys_dir = ""
 

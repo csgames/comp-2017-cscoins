@@ -2,9 +2,9 @@ import json
 import os
 import ChallengeSolver
 import time
-from coinslib import BaseClient
-from coinslib import Challenge
+from coinslib import BaseClient, Challenge
 import asyncio
+
 
 class MinerClient(BaseClient):
     def __init__(self, key_dirs="", hostname="localhost"):
