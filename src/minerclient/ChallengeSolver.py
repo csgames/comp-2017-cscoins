@@ -127,7 +127,7 @@ class ShortestPathSolver(ChallengeSolver):
                 start_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
 
             end_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
-            while end_pos in grid.walls:
+            while end_pos in grid.walls or start_pos == end_pos:
                 end_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
 
             # placing walls

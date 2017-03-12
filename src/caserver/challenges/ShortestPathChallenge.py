@@ -163,7 +163,7 @@ class ShortestPathChallenge(BaseChallengeGenerator):
             start_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
 
         end_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
-        while end_pos in grid.walls:
+        while end_pos in grid.walls or start_pos == end_pos:
             end_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
 
         # placing walls

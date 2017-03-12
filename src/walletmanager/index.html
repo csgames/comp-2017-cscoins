@@ -19,7 +19,7 @@
 			</div>
 			<div id="job-status" class="row">
 			</div>
-			<div id="wallet-information" class="row">
+			<div id="wallet-information" class="row section">
 				<div id="wallet-keys-form">
 					<div id="wallet-public-key-field" class="key-field">
 						<label>Wallet Public Key (PEM Format)</label><br/>
@@ -30,9 +30,14 @@
 						<textarea id="wallet-private-key" class="key-control" cols="50" rows="8"></textarea>
 					</div>
 					<button id="generate-keys-btn" onclick="generateKeys();">Generate a new key pair</button>
-					<button id="register-wallet-btn" onclick="registerWallet();">Register Wallet</button>
+					<button id="register-wallet-btn" onclick="register_wallet();">Register Wallet</button>
+					<div id="wallet-registration-information" class="section">
+						<span id="wallet-registration-pending" class="label label-info hideable" data-state="hidden">Wallet registration in progress...</span>
+						<span id="wallet-registration-error" class="label label-danger hideable" data-state="hidden">Wallet registration failed : </span>
+						<span id="wallet-registration-success" class="label label-success hideable" data-state="hidden">Wallet registered with success</span>
+					</div>
 				</div>
-				<div id="wallet-keys-toggle">
+				<div id="wallet-keys-toggle" class="section">
 					<button id="hide-wallet-keys-btn" onclick="hideKeys();">Hide Wallet Keys</button>
 					<button id="show-wallet-keys-btn" class="hideable" data-state="hidden" onclick="showKeys();">Show Wallet Keys</button>
 				</div>
@@ -45,10 +50,10 @@
 					<button onclick="calculateBalance();">Calculate Wallet Balance</button>
 				</div>
 			</div>
-			<div id="send-coins-toggle" class="row">
+			<div id="send-coins-toggle" class="row section">
 				<button onclick="toggleSendCoins();">Send coins...</button>
 			</div>
-			<div id="send-coins-section" class="hideable row" data-state="hidden">
+			<div id="send-coins-section" class="hideable row section" data-state="hidden">
 				<div id="send-coins-form" class="hideable" data-state="visible">
 					<div id="recipient-field">
 						<label>Recipient</label>
@@ -60,16 +65,16 @@
 					</div>
 					<button onclick="send_coins();">Send</button>
 				</div>
-				<div id="transaction-information">
-					<span id="send-coin-pending" class="label label-info hideable" data-state="hidden">Transaction creation in progres...</span>
+				<div id="transaction-information" class="section">
+					<span id="send-coin-pending" class="label label-info hideable" data-state="hidden">Transaction creation in progress...</span>
 					<span id="send-coin-error" class="label label-danger hideable" data-state="hidden">Transaction failed : </span>
 					<span id="send-coin-success" class="label label-success hideable" data-state="hidden">Transaction success : </span>
 				</div>
 			</div>
-			<div id="transactions-toggle" class="row">
+			<div id="transactions-toggle" class="row section">
 				<button onclick="showHideTransactions();">Show/Hide transaction</button>
 			</div>
-			<div id="transactions-section" class="hideable row" data-state="hidden">
+			<div id="transactions-section" class="hideable row section" data-state="hidden">
 				<div id="transactions-container" class="container">
 					<div id="txn-header" class="row table-header">
 						<div class="col-md-1">Id</div>

@@ -21,14 +21,13 @@ function generateId() {
 
 
 var coinsClient = {
-	//server_uri: "wss://cscoins.2017.csgames.org:8989/client",
-	server_uri: "ws://localhost:8989/client",
+	server_uri: "wss://cscoins.2017.csgames.org:8989/client",
+	//server_uri: "ws://localhost:8989/client",
 	socket: null,
 	wallet_id: null,
 	public_key: null,
 	private_key: null,
 	transactions: [],
-	my_transactions: [],
 	connected: false,
 	jobs_queue: [],
 	current_job: null,
@@ -40,6 +39,7 @@ var coinsClient = {
 	},
 	
 	connect: function(connect_callback) {
+
 		if(!coinsClient.socket) {
 			coinsClient.loadKeysFromStorage();
 			
@@ -177,10 +177,15 @@ var coinsClient = {
 					websocket.send(command);
 				},
 				function(job, data) {
-					if(data.success)
-					{
-						//todo wallet created succesfully
+				    console.log(data);
+					if(data.error) {
+						walletRegistrationFailed(data.error);
 					}
+					else {
+					    walletRegistrationSuccess();
+					}
+
+					job.terminated = true;
 				}
 			);
 		}
@@ -414,24 +419,16 @@ function toggleSendCoins() {
 	var sendCoinsForm = $('#send-coins-form');
 	
 	resetSendCoinStatus();
-	
-    if(sendCoinsSection.data('state') === 'hidden') {
-        sendCoinsSection.fadeIn();
-		sendCoinsSection.data('state', 'visible');
-    } else {
-		sendCoinsSection.fadeOut();
-		sendCoinsSection.data('state', 'hidden');
-	}
-	
-	if(sendCoinsForm.data('state') === 'hidden'){
-		sendCoinsForm.fadeIn();
-		sendCoinsForm.data('state', 'visible');
-	} 
+    sendCoinsSection.show();
+    sendCoinsSection.data('state','visible');
+
+	sendCoinsForm.show();
+	sendCoinsForm.data('state','visible');
 }
 
 function resetSendCoinStatus()
 {
-	$('#transaction-information span').each(function (index, value){
+	$('#transaction-information span.label').each(function (index, value){
 		var label = $(value);
 		label.hide();
 		label.data('state', 'hidden');
@@ -468,4 +465,33 @@ function send_coins() {
 	$('#send-coin-pending').fadeIn();
 	
 	coinsClient.create_transaction(recipient, amount);
+}
+
+function register_wallet() {
+    resetWalletRegistrationStatus();
+    generateWalletId();
+    var walletName = window.prompt("What is the name of this wallet ?", "Unknown");
+    coinsClient.register_wallet(walletName);
+    $('#wallet-registration-pending').show();
+}
+
+function resetWalletRegistrationStatus()
+{
+	$('#wallet-registration-information span.label').each(function (index, value){
+		var label = $(value);
+		label.hide();
+		label.data('state', 'hidden');
+	});
+}
+
+function walletRegistrationFailed(errorMessage) {
+    resetWalletRegistrationStatus();
+    var errorLabel = $('#wallet-registration-error');
+	errorLabel.text(errorLabel.text().split(':')[0] + ' : ' + errorMessage);
+	errorLabel.fadeIn();
+}
+
+function walletRegistrationSuccess() {
+    resetWalletRegistrationStatus()
+    $('#wallet-registration-success').fadeIn();
 }

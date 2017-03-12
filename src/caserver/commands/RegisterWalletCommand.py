@@ -24,7 +24,7 @@ class RegisterWalletCommand(BaseCommand):
             existing_wallet = self.database.get_wallet_by_id(wallet_id)
 
             if existing_wallet is not None:
-                response["error"] = "Wallet {0} already registered"
+                response["error"] = "Wallet {0} already registered".format(wallet_id)
                 return
 
             # verifying the signature
