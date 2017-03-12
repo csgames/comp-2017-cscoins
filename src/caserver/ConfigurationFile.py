@@ -14,6 +14,9 @@ class ConfigurationFile(object):
         lines = fp.readlines()
 
         for l in lines:
+            if l.startswith('#'):
+                continue
+
             data = l.split('=')
             if len(data) >= 2:
                 var = data[0].lstrip().rstrip()

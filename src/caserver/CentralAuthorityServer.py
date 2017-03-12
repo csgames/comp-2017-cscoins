@@ -39,6 +39,8 @@ class CentralAuthorityServer(object):
     def __init__(self):
         decimal.getcontext().prec = 5
         self.config_file = ConfigurationFile.ConfigurationFile()
+        self.port = 8989
+        self.listen_address = "localhost"
         self.server_socket = None
         self.wallets = []
         self.authority_wallet = None
@@ -76,6 +78,8 @@ class CentralAuthorityServer(object):
 
     def read_vars_from_config(self):
         self.config_file.read_file()
+        self.port = self.config_file.get_int('port', 8989)
+        self.listen_address = self.config_file.get_string('listen_address', 'localhost')
         self.ssl_on = self.config_file.get_bool('ssl_on', True)
         self.ssl_cert = self.config_file.get_string('ssl_cert', '../server.pem')
 
@@ -357,9 +361,9 @@ class CentralAuthorityServer(object):
         if self.ssl_on:
             ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_SSLv23)
             ssl_context.load_cert_chain(self.ssl_cert)
-            self.server_socket = websockets.serve(self.handle_connection, 'localhost', 8989, ssl=ssl_context)
+            self.server_socket = websockets.serve(self.handle_connection, self.listen_address, self.port, ssl=ssl_context)
         else:
-            self.server_socket = websockets.serve(self.handle_connection, 'localhost', 8989)
+            self.server_socket = websockets.serve(self.handle_connection, self.listen_address, self.port)
 
         try:
             asyncio.get_event_loop().run_until_complete(self.server_socket)

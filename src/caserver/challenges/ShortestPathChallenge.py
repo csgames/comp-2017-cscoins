@@ -102,7 +102,7 @@ class ShortestPathChallenge(BaseChallengeGenerator):
     def read_parameters(self):
         self.config_file.read_file()
         self.parameters["grid_size"] = self.config_file.get_int('shortest_path.grid_size', 25)
-        self.parameters["nb_blockers"] = self.config_file.get_int('shortest_path.nb_blockers', 150)
+        self.parameters["nb_blockers"] = self.config_file.get_int('shortest_path.nb_blockers', 80)
         self.debug_output = self.config_file.get_bool('shortest_path.debug_output', False)
         self.read_nonce_limit()
 
@@ -148,7 +148,7 @@ class ShortestPathChallenge(BaseChallengeGenerator):
         seed_hash = self.generate_seed_hash(previous_hash, nonce)
         # seed is the last solution hash suffix, else it's 0
         prng = coinslib.MT64(coinslib.seed_from_hash(seed_hash))
-        # todo, if start_pos or end_pos, generate another coord
+
         for i in range(self.parameters["grid_size"]):
             # placing extremity walls
             grid.walls.append((i, 0))
@@ -174,7 +174,6 @@ class ShortestPathChallenge(BaseChallengeGenerator):
                 grid.walls.append(block_pos)
 
         path = []
-
         came_from, cost_so_far = dijkstra_search(grid, start_pos, end_pos)
         path = reconstruct_path(came_from, start_pos, end_pos)
 
