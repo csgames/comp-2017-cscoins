@@ -149,9 +149,6 @@ class ShortestPathChallenge(BaseChallengeGenerator):
         # seed is the last solution hash suffix, else it's 0
         prng = coinslib.MT64(coinslib.seed_from_hash(seed_hash))
         # todo, if start_pos or end_pos, generate another coord
-        start_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
-        end_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
-
         for i in range(self.parameters["grid_size"]):
             # placing extremity walls
             grid.walls.append((i, 0))
@@ -160,6 +157,14 @@ class ShortestPathChallenge(BaseChallengeGenerator):
             if i > 0 and i < (self.parameters["grid_size"] - 1):
                 grid.walls.append((0, i))
                 grid.walls.append((self.parameters["grid_size"] - 1, i))
+
+        start_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
+        while start_pos in grid.walls:
+            start_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
+
+        end_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
+        while end_pos in grid.walls:
+            end_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
 
         # placing walls
         for i in range(self.parameters["nb_blockers"]):

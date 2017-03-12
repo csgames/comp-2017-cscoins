@@ -123,7 +123,12 @@ class ShortestPathSolver(ChallengeSolver):
                     grid.walls.append((grid_size - 1, i))
 
             start_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
+            while start_pos in grid.walls:
+                start_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
+
             end_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
+            while end_pos in grid.walls:
+                end_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
 
             # placing walls
             for i in range(nb_blockers):

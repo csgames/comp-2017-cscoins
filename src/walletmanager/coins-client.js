@@ -411,6 +411,10 @@ function showHideTransactions() {
 
 function toggleSendCoins() {
     var sendCoinsSection = $('#send-coins-section');
+	var sendCoinsForm = $('#send-coins-form');
+	
+	resetSendCoinStatus();
+	
     if(sendCoinsSection.data('state') === 'hidden') {
         sendCoinsSection.fadeIn();
 		sendCoinsSection.data('state', 'visible');
@@ -418,16 +422,50 @@ function toggleSendCoins() {
 		sendCoinsSection.fadeOut();
 		sendCoinsSection.data('state', 'hidden');
 	}
+	
+	if(sendCoinsForm.data('state') === 'hidden'){
+		sendCoinsForm.fadeIn();
+		sendCoinsForm.data('state', 'visible');
+	} 
+}
+
+function resetSendCoinStatus()
+{
+	$('#transaction-information span').each(function (index, value){
+		var label = $(value);
+		label.hide();
+		label.data('state', 'hidden');
+	});
 }
 
 function transactionSuccess(txnId) {
+	$('#send-coins-toggle').fadeIn();
 	
+	resetSendCoinStatus();
+	var successLabel = $('#send-coin-success');
+	successLabel.text(successLabel.text().split(':')[0] + ' : id = ' + txnId);
+	successLabel.fadeIn();
 }
 
 function transactionFailed(errorMessage) {
+	$('#send-coins-toggle').fadeIn();
 	
+	resetSendCoinStatus();
+	
+	var errorLabel = $('#send-coin-error');
+	errorLabel.text(errorLabel.text().split(':')[0] + ' : ' + errorMessage);
+	errorLabel.fadeIn();
 }
 
-function sendCoins() {
+function send_coins() {
+	var recipient = $('#transaction-recipient').val();
+	var amount = $('#transaction-amount').val();
 	
+	var sendCoinsForm = $('#send-coins-form');
+	sendCoinsForm.fadeOut();
+	sendCoinsForm.data('state', 'hidden');
+	
+	$('#send-coin-pending').fadeIn();
+	
+	coinsClient.create_transaction(recipient, amount);
 }

@@ -16,7 +16,15 @@ class CreateTransactionCommand(BaseCommand):
         try:
             source = args['source']
             recipient = args['recipient']
-            amount = decimal.Decimal(args['amount'])
+            if ',' in args['amount']:
+                args['amount'] = args['amount'].replace(',','.')
+
+            try:
+                amount = decimal.Decimal(args['amount'])
+            except:
+                response["error"] = "Invalid amount, unable to parse"
+                return
+
             signature = args['signature']
             sign_digest = bytes.fromhex(signature)
             source_wallet = self.database.get_wallet_by_id(source)

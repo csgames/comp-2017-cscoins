@@ -49,7 +49,7 @@
 				<button onclick="toggleSendCoins();">Send coins...</button>
 			</div>
 			<div id="send-coins-section" class="hideable row" data-state="hidden">
-				<div id="send-coins-form">
+				<div id="send-coins-form" class="hideable" data-state="visible">
 					<div id="recipient-field">
 						<label>Recipient</label>
 						<input type="text" size="96" id="transaction-recipient" placeholder="Recipient Wallet Id">
@@ -58,12 +58,12 @@
 						<label>Amount</label>
 						<input type="text" id="transaction-amount" placeholder="0.00000">
 					</div>
-					<button onclick="sendCoins();">Send</button>
+					<button onclick="send_coins();">Send</button>
 				</div>
 				<div id="transaction-information">
-					<span class="label label-info hideable" data-state="hidden">Transaction creation in progres...</span>
-					<span class="label label-danger hideable" data-state="hidden">Transaction failed : </span>
-					<span class="label label-success hideable" data-state="hidden">Transaction success : </span>
+					<span id="send-coin-pending" class="label label-info hideable" data-state="hidden">Transaction creation in progres...</span>
+					<span id="send-coin-error" class="label label-danger hideable" data-state="hidden">Transaction failed : </span>
+					<span id="send-coin-success" class="label label-success hideable" data-state="hidden">Transaction success : </span>
 				</div>
 			</div>
 			<div id="transactions-toggle" class="row">
