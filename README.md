@@ -208,7 +208,7 @@ You need to find the optimal path in a Grid. You can only go up, down, right and
 
  - First, Place some walls at each border tiles. (First row, last row, first column and last column).
  - We generate an starting coordinate and a ending coordinate. (PRNG.extract_number % grid_size, PRNG.extract_number % grid_size)
-     - While starting coordinate is a wall already, generate another starting coordinate.
+     - While starting coordinate if is a wall already, generate another starting coordinate.
      - Do the same with the ending coordinate, but if the generated ending coordinate is the same as the starting one, generating another ending coordinate.
  - Generate **nb_blockers** walls with the PRNG (PRNG.extract_number % grid_size, PRNG.extract_number % grid_size), if the coordinate is the same as the starting coord or the ending coord, skip this blockers.
 
