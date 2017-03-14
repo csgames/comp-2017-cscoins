@@ -211,23 +211,24 @@ You need to find the optimal path in a Grid. You can only go up, down, right and
      - While starting coordinate is a wall/blocker, generate another starting coordinate.
      - Do the same with the ending coordinate, but also if the generated ending coordinate is the same as the starting one, generating another ending coordinate.
  - Generate **nb_blockers** walls with the PRNG (PRNG.extract_number % grid_size, PRNG.extract_number % grid_size), if the coordinate is the same as the starting coord or the ending coord, skip this blockers.
+ - Find the shortest path. If there's multiple possibility, use the first one, and we check the nearest neighbors in that order : down, up, right, left.
 
-**Example**: We got a grid of size 10 with 5 blockers, "x" is a blocker, "s" is the starting point, "e" is the ending point and "p" is the path.
+**Example**: We got a grid of size 10 with 5 blockers, "x" is a blocker, "s" is the starting point, "e" is the ending point and "p" is the path. You can also look at [src/caserver/challenges/ShortestPathChallenge.py] to know how the server solve the grid.
 
 ```
 xxxxxxxxxx
 x        x
 xsx      x
-xpp x    x
-x p  x   x
-x pex    x
+xpppx    x
+x  p x   x
+x  ex    x
 x    x   x
 x        x
 x        x
 xxxxxxxxxx
 ```
 
-The solution path is `[(2, 1), (3, 1), (3, 2), (4, 3), (5, 3), (5, 4)]`. The solution string would be `"213132435354"`.
+The solution path is `[(2, 1), (3, 1), (3, 2), (3, 3), (4, 3), (5, 3)]`. The solution string would be `"213132435354"`.
 
 ## Wallet
 
