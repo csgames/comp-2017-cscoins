@@ -170,7 +170,7 @@ class ShortestPathChallenge(BaseChallengeGenerator):
         for i in range(self.parameters["nb_blockers"]):
             # wall pos (row, col)
             block_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
-            if block_pos != start_pos and block_pos != end_pos:
+            if block_pos != start_pos and block_pos != end_pos and block_pos not in grid.walls:
                 grid.walls.append(block_pos)
 
         path = []

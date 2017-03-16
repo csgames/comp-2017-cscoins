@@ -210,7 +210,9 @@ You need to find the optimal path in a Grid. You can only go up, down, right and
  - We generate an starting coordinate and a ending coordinate. (PRNG.extract_number % grid_size, PRNG.extract_number % grid_size)
      - While starting coordinate is a wall/blocker, generate another starting coordinate.
      - Do the same with the ending coordinate, but also if the generated ending coordinate is the same as the starting one, generating another ending coordinate.
- - Generate **nb_blockers** walls with the PRNG (PRNG.extract_number % grid_size, PRNG.extract_number % grid_size), if the coordinate is the same as the starting coord or the ending coord, skip this blockers.
+ - Generate **nb_blockers** walls with the PRNG (PRNG.extract_number % grid_size, PRNG.extract_number % grid_size).
+	- If the coordinate is the same as the starting coord or the ending coord, skip this blockers.
+	- If the coordinate is already blocker, skip this blockers.
  - Find the shortest path. If there's multiple possibility, use the first one, and we check the nearest neighbors in that order : down, up, right, left.
 
 **Example**: We got a grid of size 10 with 5 blockers, "x" is a blocker, "s" is the starting point, "e" is the ending point and "p" is the path. You can also look at [ShortestPathChallenge.py](src/caserver/challenges/ShortestPathChallenge.py) to know how the server solve the grid.

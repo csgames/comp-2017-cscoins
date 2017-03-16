@@ -134,7 +134,7 @@ class ShortestPathSolver(ChallengeSolver):
             for i in range(nb_blockers):
                 # wall pos (row, col)
                 block_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
-                if block_pos != start_pos and block_pos != end_pos:
+                if block_pos != start_pos and block_pos != end_pos and block_pos not in grid.walls:
                     grid.walls.append(block_pos)
 
             #trying to resolve the grid
