@@ -250,6 +250,8 @@ We are using RSA digital signature protocol according to PKCS#1 v1.5. Some messa
 
 The Central Authority Server use the [WebSocket protocol](https://en.wikipedia.org/wiki/WebSocket) to communicate. The server URI is [wss://cscoins.2017.csgames.org:8989/client](wss://cscoins.2017.csgames.org:8989/client). Once a client is connected, the server will be waiting for any incoming commands. All data sent or received are serialized in JSON.
 
+All responses sent by the Central Authority Server contains a `type` attribute. This attribute will tell you the type of the response object.
+
 ### Available commands
 
 *   [get_current_challenge](#get-current-challenge-command)
@@ -284,6 +286,7 @@ There's no argument.
 
 |Field Name|Type|Description|
 |----------|----|-----------|
+|type|String|`current_challenge`|
 |time_left|Integer|Time left in seconds to solve the problem set.|
 |challenge_id|Integer|Current challenge id|
 |challenge_name|String|Current challenge type name. **Example**: `sorted_list`|
@@ -309,6 +312,7 @@ The response has the same content as the `get_current_challenge` command, with t
 
 |Field Name|Type|Description|
 |----------|----|-----------|
+|type|String|`challenge_solution`|
 |nonce|String|Nonce used to seed the PRNG.|
 |solution_hash|String|Solution hash that validated with the challenge prefix.|
 
@@ -344,6 +348,7 @@ Register your Wallet's public key with the Central Authority.
 
 |Field Name|Type|Description|
 |----------|----|-----------|
+|type|String|`register_wallet`|
 |error|String|Error message if something went wrong|
 
 #### Get Transactions
@@ -363,6 +368,7 @@ Get transactions history from the Central Authority.
 
 |Field Name|Type|Description|
 |----------|----|-----------|
+|type|String|`transactions`|
 |error|String|Error message if something went wrong|
 |transactions|Array&lt;Transaction&gt;|List of transaction(s)|
 
@@ -394,6 +400,7 @@ Create a new Transaction, sending coins to another wallet
 
 |Field Name|Type|Description|
 |----------|----|-----------|
+|type|String|`create_transaction`|
 |error|String|Error message if something went wrong.|
 |id|Integer|New transaction id.|
 
@@ -414,6 +421,7 @@ Submit a solution for the current challenge, awarding CSCoins to the miner if th
 
 |Field Name|Type|Description|
 |----------|----|-----------|
+|type|String|`submission`|
 |error|String|Error message if something went wrong.|
 
 #### Get Central Authority Server Information
@@ -430,6 +438,7 @@ There's no argument.
 
 |Field Name|Type|Description|
 |----------|----|-----------|
+|type|String|`ca_server_info`|
 |minutes_per_challenge|Integer|Maximum time of a challenge in minutes.|
 |coins_per_challenge|Integer|Coins awarded for a valid submission.|
 |min_transaction_amount|Decimal|Minimum transaction amount.|

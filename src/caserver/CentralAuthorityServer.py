@@ -61,10 +61,8 @@ class CentralAuthorityServer(object):
         self.min_transaction_amount = 0
         self.submissions_allowed_ips = []
         self.statistic = ServerStatistic.ServerStatistic()
-        self.database = ServerDatabase.ServerDatabase(self.config_file.get_string("db_user", "cacoins"), self.config_file.get_string("db_password", ""), self.config_file.get_string("db_name", "cacoins"))
-
-        #read from config
         self.read_vars_from_config()
+        self.database = ServerDatabase.ServerDatabase(self.config_file.get_string("db_user", "cacoins"), self.config_file.get_string("db_password", ""), self.config_file.get_string("db_name", "cacoins"))
 
         # commands handler
         self.commands_handler = []

@@ -13,6 +13,7 @@ class CreateTransactionCommand(BaseCommand):
         self.database = self.central_authority_server.database
 
     def execute(self, response, client_connection, args):
+        response["type"] = 'create_transaction'
         try:
             source = args['source']
             recipient = args['recipient']

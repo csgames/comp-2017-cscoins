@@ -9,6 +9,7 @@ class SubmissionCommand(BaseCommand):
 
     def execute(self, response, client_connection, args):
         remote_ip = client_connection.get_remote_ip()
+        response["type"] = 'submission'
         if not self.central_authority_server.is_ip_allowed_to_submit(remote_ip):
             response["error"] = "This IP Address isn't allowed to do submission"
             print("{0} is not allowed to do submission".format(remote_ip))

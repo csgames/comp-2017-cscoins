@@ -10,6 +10,7 @@ class RegisterWalletCommand(BaseCommand):
         self.database = self.central_authority_server.database
 
     def execute(self, response, client_connection, args):
+        response["type"] = 'register_wallet'
         try:
             name = args['name']
             key = args['key']

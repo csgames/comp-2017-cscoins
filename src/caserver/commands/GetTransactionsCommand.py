@@ -7,6 +7,7 @@ class GetTransactionsCommand(BaseCommand):
         self.max_transactions = 100
         
     def execute(self, response, client_connection, args):
+        response["type"] = 'transactions'
         try:
             start_transaction = int(args['start'])
             count = int(args['count'])

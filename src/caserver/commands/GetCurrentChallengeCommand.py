@@ -8,7 +8,7 @@ class GetCurrentChallengeCommand(BaseCommand):
         self.database = self.central_authority_server.database
 
     def execute(self, response, client_connection, args):
-
+        response["type"] = 'current_challenge'
         current_challenge = self.database.get_current_challenge()
         last_solution = self.database.get_challenge_by_id(current_challenge.id - 1, Challenge.Ended)
 
