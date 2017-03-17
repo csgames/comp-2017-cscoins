@@ -64,7 +64,7 @@ class ServerDatabase:
         cur.execute("""CREATE TABLE IF NOT EXISTS `submissions` (
                         `submission_id` INT NOT NULL AUTO_INCREMENT,
                         `challenge_id` INT NOT NULL,
-                        `nonce` BIGINT NOT NULL,
+                        `nonce` BIGINT UNSIGNED NOT NULL,
                         `hash` varchar(64),
                         `wallet_nid` INT NOT NULL,
                         `submitted_on` INT NULL,
