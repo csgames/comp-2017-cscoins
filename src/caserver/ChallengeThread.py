@@ -178,6 +178,7 @@ class ChallengeThread(threading.Thread):
         else:
             new_challenge = self.generate_new_challenge()
 
+        new_challenge.fill_prefix(self.central_authority_server.prefix_length)
         new_challenge.status = Challenge.InProgress
         new_challenge.started_on = int(time.time())
         self.database.update_challenge(new_challenge)
