@@ -141,7 +141,7 @@ class ServerDatabase:
         cur.close()
         conn.close()
 
-    def get_client_lastest_cooldown(self, remote_ip):
+    def get_client_latest_cooldown(self, remote_ip):
         client_cooldown = None
         conn = self.connect()
         cur = conn.cursor()

@@ -155,7 +155,7 @@ class ChallengeThread(threading.Thread):
         if invalid_submission_count >= self.central_authority_server.invalid_submission_allowed:
             # add a client cooldown
             cooldown_length = self.central_authority_server.initial_cooldown_length
-            last_cooldown = self.database.get_lastest_client_cooldown(submission.remote_ip)
+            last_cooldown = self.database.get_client_latest_cooldown(submission.remote_ip)
             if last_cooldown is not None:
                 cooldown_length = last_cooldown.length * 2
 
@@ -205,6 +205,5 @@ class ChallengeThread(threading.Thread):
         self.central_authority_server.read_vars_from_config()
         new_challenge.duration = self.central_authority_server.minutes_per_challenge
         new_challenge.coin_value = self.central_authority_server.coins_per_challenge
-        new_challenge.fill_prefix(self.central_authority_server.prefix_length)
         self.database.add_challenge(new_challenge)
         return new_challenge

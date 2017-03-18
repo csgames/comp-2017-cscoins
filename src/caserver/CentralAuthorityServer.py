@@ -188,7 +188,7 @@ class CentralAuthorityServer(object):
                     response = await self.execute_client_command(client_connection, command, args)
                 else:
                     cooldown_length = self.initial_cooldown_length
-                    lastest_cooldown = self.database.get_client_lastest_cooldown(remote_addr[0])
+                    lastest_cooldown = self.database.get_client_latest_cooldown(remote_addr[0])
                     if lastest_cooldown is not None:
                         cooldown_length = lastest_cooldown.length * 2
                     print("Client {0} has been put on a cooldown for {1} minutes. (Too much requests per minutes)".format(remote_addr[0], int(cooldown_length/60)))
