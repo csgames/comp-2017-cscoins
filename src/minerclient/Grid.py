@@ -30,9 +30,7 @@ class Grid:
 
     def neighbors(self, pos):
         (row, col) = pos
-        results = [ (row+1, col), (row-1, col), (row, col+1), (row, col-1)]
-        if (row + col) % 2 == 0:
-            results.reverse()
+        results = [(row+1, col), (row-1, col), (row, col+1), (row, col-1)]
 
         results = filter(self.in_range, results)
         results = filter(self.walkable, results)
