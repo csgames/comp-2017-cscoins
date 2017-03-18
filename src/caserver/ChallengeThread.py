@@ -72,6 +72,8 @@ class ChallengeThread(threading.Thread):
             self.current_challenge.started_on = int(time.time())
             self.database.update_challenge(self.current_challenge)
             print("New challenge generated for {0} minutes".format(self.current_challenge.duration))
+        else:
+            self.current_challenge.fill_prefix(self.central_authority_server.prefix_length)
 
     def run(self):
         while self.alive:
