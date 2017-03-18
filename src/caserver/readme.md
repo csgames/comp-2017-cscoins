@@ -2,11 +2,10 @@
 
 ### Dependencies
  * Python 3.5+
- * Websockets
+ * websockets
  * asyncio
  * mysqlclient
  * pycrypto
- * numpy
 
 ### Infra
  * Tested on debian testing (stretch).
