@@ -32,7 +32,7 @@ class ServerDatabase:
                       `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
                       `source` varchar(64) NOT NULL,
                       `recipient` varchar(64) NOT NULL,
-                      `amount` decimal(12,5) NOT NULL,
+                      `amount` decimal(20,5) NOT NULL,
                       `signature` TEXT NOT NULL,
                       `created_on` int(11) DEFAULT NULL,
                       PRIMARY KEY (`transaction_id`)
@@ -42,7 +42,7 @@ class ServerDatabase:
         cur.execute("""CREATE TABLE IF NOT EXISTS `wallet_balances` (
                         `wallet_balance_id` INT NOT NULL AUTO_INCREMENT,
                         `wallet_nid` INT NOT NULL,
-                        `wallet_balance` DECIMAL(12,5) NOT NULL,
+                        `wallet_balance` DECIMAL(20,5) NOT NULL,
                         PRIMARY KEY (`wallet_balance_id`)
                         ) ENGINE=InnoDB DEFAULT CHARSET=latin1;""")
 
