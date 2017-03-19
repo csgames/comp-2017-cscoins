@@ -185,7 +185,10 @@ class CentralAuthorityServer(object):
                 request_count = self.database.get_client_request_count(remote_addr[0])
 
                 if request_count <= self.max_requests_per_minutes:
-                    response = await self.execute_client_command(client_connection, command, args)
+                    try:
+                        response = await self.execute_client_command(client_connection, command, args)
+                    except Exception as e:
+                        print("Error during execute_client_command: {0}".format(e))
                 else:
                     cooldown_length = self.initial_cooldown_length
                     lastest_cooldown = self.database.get_client_latest_cooldown(remote_addr[0])

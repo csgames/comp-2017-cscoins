@@ -169,3 +169,12 @@ class BaseClient:
             print("Wallet created : {}".format(response["wallet_id"]))
             return
 
+
+    async def get_ca_server_info(self):
+        command = {"command": "ca_server_info", "args": {}}
+        message = json.dumps(command)
+        await self.socket.send(message)
+        message = await self.socket.recv()
+        response = json.loads(message)
+
+        print(response)

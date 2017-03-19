@@ -40,6 +40,7 @@ class ChallengeThread(threading.Thread):
             for c in last_challenges:
                 if c.status == Challenge.Ended:
                     challenges.append(c)
+                    self.last_solution_hash = c.hash
                 elif c.status == Challenge.InProgress:
                     print("Challenge In Progress found #{0}".format(c.id))
                     self.current_challenge = c
@@ -53,6 +54,7 @@ class ChallengeThread(threading.Thread):
                 self.current_challenge = c
             elif c.status == Challenge.Ended:
                 challenges.append(c)
+                self.last_solution_hash = c.hash
 
         self.previous_challenge = challenges
 
