@@ -2,6 +2,7 @@ import MySQLdb
 import Transaction
 import time
 import Wallet
+import RequestControl
 import decimal
 import json
 from challenges import Challenge, Submission
@@ -31,7 +32,7 @@ class ServerDatabase:
                       `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
                       `source` varchar(64) NOT NULL,
                       `recipient` varchar(64) NOT NULL,
-                      `amount` decimal(12,5) NOT NULL,
+                      `amount` decimal(20,5) NOT NULL,
                       `signature` TEXT NOT NULL,
                       `created_on` int(11) DEFAULT NULL,
                       PRIMARY KEY (`transaction_id`)
@@ -41,7 +42,7 @@ class ServerDatabase:
         cur.execute("""CREATE TABLE IF NOT EXISTS `wallet_balances` (
                         `wallet_balance_id` INT NOT NULL AUTO_INCREMENT,
                         `wallet_nid` INT NOT NULL,
-                        `wallet_balance` DECIMAL(12,5) NOT NULL,
+                        `wallet_balance` DECIMAL(20,5) NOT NULL,
                         PRIMARY KEY (`wallet_balance_id`)
                         ) ENGINE=InnoDB DEFAULT CHARSET=latin1;""")
 
@@ -49,7 +50,7 @@ class ServerDatabase:
                         `challenge_id` INT NOT NULL AUTO_INCREMENT,
                         `challenge_name` VARCHAR(255) NOT NULL,
                         `solution_string` LONGTEXT NOT NULL,
-                        `nonce` INT NOT NULL,
+                        `nonce` BIGINT NOT NULL,
                         `coin_value` INT NOT NULL,
                         `hash` varchar(64) NOT NULL,
                         `parameters` TEXT NOT NULL,
@@ -63,14 +64,40 @@ class ServerDatabase:
         cur.execute("""CREATE TABLE IF NOT EXISTS `submissions` (
                         `submission_id` INT NOT NULL AUTO_INCREMENT,
                         `challenge_id` INT NOT NULL,
-                        `nonce` INT NOT NULL,
+                        `nonce` BIGINT UNSIGNED NOT NULL,
                         `hash` varchar(64),
                         `wallet_nid` INT NOT NULL,
                         `submitted_on` INT NULL,
+                        `remote_ip` VARCHAR(96) NOT NULL,
                         PRIMARY KEY (`submission_id`)
                     ) ENGINE=InnoDB DEFAULT CHARSET=latin1;""")
 
+        cur.execute("""CREATE TABLE IF NOT EXISTS `clients_request` (
+                        `client_request_id` INT NOT NULL AUTO_INCREMENT,
+                        `remote_ip`  VARCHAR(96) NOT NULL,
+                        `command` TEXT,
+                        `requested_on` INT NOT NULL,
+                        PRIMARY KEY (`client_request_id`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=latin1;""")
+
+        cur.execute("""CREATE TABLE IF NOT EXISTS `clients_cooldown` (
+                    `client_cooldown_id` INT NOT NULL AUTO_INCREMENT,
+                    `remote_ip` VARCHAR(96) NOT NULL,
+                    `cooldown_length` INT NOT NULL,
+                    `end_on` INT NOT NULL,
+                    PRIMARY KEY (`client_cooldown_id`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=latin1;""")
+
+        cur.execute("""CREATE TABLE IF NOT EXISTS `invalid_submissions` (
+                    `invalid_submission_id` INT NOT NULL AUTO_INCREMENT,
+                    `remote_ip` VARCHAR(96) NOT NULL,
+                    `wallet_nid` VARCHAR(64) NOT NULL,
+                    `verified_on` INT NOT NULL,
+                    PRIMARY KEY (`invalid_submission_id`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=latin1;""")
+
         cur.execute("""DELETE FROM wallet_balances;""")
+        cur.execute("""DELETE FROM clients_request;""")
 
         conn.commit()
 
@@ -85,6 +112,115 @@ class ServerDatabase:
             print("MySQL Connection error : {0}".format(e))
 
         return conn
+
+    def get_invalid_submission_count(self, remote_ip):
+        time_start = int(time.time()) - (5 * 60)
+        invalid_submission_count = 0
+        conn = self.connect()
+        cur = conn.cursor()
+
+        query = """SELECT COUNT(invalid_submission_id) FROM invalid_submissions WHERE remote_ip = %s AND verified_on >= %s"""
+        cur.execute(query, (remote_ip, time_start, ))
+
+        row = cur.fetchone()
+        if row:
+            invalid_submission_count = row[0]
+
+        cur.close()
+        conn.close()
+        return invalid_submission_count
+
+    def add_invalid_submission(self, invalid_submission):
+        conn = self.connect()
+        cur = conn.cursor()
+
+        query = """INSERT INTO invalid_submissions (remote_ip, wallet_nid, verified_on) VALUES (%s, %s, %s)"""
+        cur.execute(query, (invalid_submission.remote_ip, invalid_submission.wallet_nid, invalid_submission.verified_on,))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    def get_client_latest_cooldown(self, remote_ip):
+        client_cooldown = None
+        conn = self.connect()
+        cur = conn.cursor()
+
+        query = """SELECT client_cooldown_id, remote_ip, cooldown_length, end_on FROM clients_cooldown WHERE remote_ip = %s ORDER BY client_cooldown_id DESC"""
+
+        cur.execute(query, (remote_ip, ))
+
+        row = cur.fetchone()
+        if row:
+            client_cooldown = RequestControl.ClientCooldown(row[1], row[2], row[3], row[0])
+
+        cur.close()
+        conn.close()
+
+        return client_cooldown
+
+    def is_client_on_cooldown(self, remote_ip):
+        timestamp = int(time.time())
+        is_on_cooldown = False
+        conn = self.connect()
+        cur = conn.cursor()
+
+        query = """SELECT client_cooldown_id FROM clients_cooldown WHERE remote_ip = %s AND end_on > %s"""
+        cur.execute(query, (remote_ip, timestamp, ))
+
+        row = cur.fetchone()
+
+        if row:
+            is_on_cooldown = True
+
+        cur.close()
+        conn.close()
+
+        return is_on_cooldown
+
+    def add_client_cooldown(self, client_cooldown):
+        conn = self.connect()
+        cur = conn.cursor()
+
+        query = """INSERT INTO `clients_cooldown` (remote_ip, cooldown_length, end_on) VALUES (%s, %s, %s)"""
+        cur.execute(query, (client_cooldown.remote_ip, client_cooldown.length, client_cooldown.end_on, ))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    def get_client_request_count(self, remote_ip):
+        request_count = 0
+        conn = self.connect()
+        cur = conn.cursor()
+
+        timestamp_start = int(time.time()) - 60
+
+        query = """SELECT COUNT(client_request_id) FROM clients_request WHERE remote_ip = %s AND requested_on >= %s"""
+
+        cur.execute(query, (remote_ip, timestamp_start, ))
+
+        row = cur.fetchone()
+
+        if row:
+            request_count = row[0]
+
+        cur.close()
+        conn.close()
+
+        return request_count
+
+    def add_client_request(self, client_request):
+        conn = self.connect()
+        cur = conn.cursor()
+
+        query = """INSERT INTO clients_request (remote_ip, command, requested_on) VALUES (%s, %s, %s)"""
+
+        cur.execute(query, (client_request.remote_ip, client_request.command, client_request.requested_on, ))
+
+        conn.commit()
+        cur.close()
+        conn.close()
 
     def update_challenge(self, challenge):
         if challenge.id > 0:
@@ -310,11 +446,11 @@ class ServerDatabase:
         row = cur.fetchone()
         if row:
             submission.id = row[0]
-            query = """UPDATE submissions SET nonce = %s, submitted_on = %s WHERE submission_id = %s"""
-            rs = cur.execute(query, (submission.nonce, timestamp, submission.id, ))
+            query = """UPDATE submissions SET nonce = %s, submitted_on = %s, remote_ip = %s WHERE submission_id = %s"""
+            rs = cur.execute(query, (submission.nonce, timestamp, submission.remote_ip, submission.id, ))
         else:
-            query = """INSERT INTO submissions (challenge_id, nonce, wallet_nid, submitted_on) VALUES (%s, %s, %s, %s)"""
-            rs = cur.execute(query, (submission.challenge_id, submission.nonce, submission.wallet.nid, timestamp, ))
+            query = """INSERT INTO submissions (challenge_id, nonce, wallet_nid, submitted_on, remote_ip) VALUES (%s, %s, %s, %s, %s)"""
+            rs = cur.execute(query, (submission.challenge_id, submission.nonce, submission.wallet.nid, timestamp, submission.remote_ip, ))
 
             query = """SELECT submission_id FROM submissions WHERE challenge_id = %s AND wallet_nid = %s AND submitted_on = %s"""
             rs = cur.execute(query, (submission.challenge_id, submission.wallet.nid, timestamp))
@@ -359,7 +495,8 @@ class ServerDatabase:
                         w.wallet_id,
                         w.wallet_key,
                         w.wallet_name,
-                        wb.wallet_balance
+                        wb.wallet_balance,
+                        s.remote_ip
                     FROM submissions s
                     JOIN wallets w ON s.wallet_nid = w.wallet_nid
                     JOIN wallet_balances wb ON wb.wallet_nid = s.wallet_nid
@@ -373,7 +510,7 @@ class ServerDatabase:
             wallet.nid = int(row[5])
             wallet.balance = decimal.Decimal(row[9])
 
-            submission = Submission(int(row[1]), int(row[2]), wallet)
+            submission = Submission(int(row[1]), int(row[2]), wallet, row[10])
             submission.id = int(row[0])
             submission.submitted_on = int(row[4])
 

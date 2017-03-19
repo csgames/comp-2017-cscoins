@@ -2,11 +2,9 @@ import json
 import os
 import ChallengeSolver
 import time
-from Crypto.Hash import SHA256
-from coinslib import BaseClient
-from coinslib import Challenge
-import websockets
+from coinslib import BaseClient, Challenge
 import asyncio
+
 
 class MinerClient(BaseClient):
     def __init__(self, key_dirs="", hostname="localhost"):
@@ -16,6 +14,7 @@ class MinerClient(BaseClient):
         self.solvers = {}
         self.solvers["sorted_list"] = ChallengeSolver.SortedListSolver
         self.solvers["reverse_sorted_list"] = ChallengeSolver.ReverseSortedListSolver
+        self.solvers["shortest_path"] = ChallengeSolver.ShortestPathSolver
 
         self.solving_thread = None
 
@@ -66,7 +65,7 @@ class MinerClient(BaseClient):
         self.solving_thread.start()
 
         while not self.solving_thread.solution_found and self.solving_thread.alive:
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(0.5)
 
         return self.solving_thread.solution
 
@@ -90,8 +89,9 @@ class MinerClient(BaseClient):
         while True:
             new_challenge = False
             while not new_challenge:
-                mine_task = asyncio.ensure_future(self.solve_challenge(current_challenge))
                 recv_task = asyncio.ensure_future(self.wait_for_new_challenge())
+                mine_task = asyncio.ensure_future(self.solve_challenge(current_challenge))
+
                 done, pending = await asyncio.wait([recv_task, mine_task], return_when=asyncio.FIRST_COMPLETED)
 
                 if mine_task in done:
@@ -123,4 +123,4 @@ class MinerClient(BaseClient):
                 else:
                     recv_task.cancel()
 
-                asyncio.sleep(0.01)
+                asyncio.sleep(1)

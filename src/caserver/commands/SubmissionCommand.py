@@ -1,9 +1,6 @@
 from .BaseCommand import BaseCommand
 from caserver.challenges import Submission
-from Crypto.PublicKey import RSA
-from Crypto.Hash import SHA256
-from Crypto.Signature import PKCS1_v1_5
-import base64
+
 
 class SubmissionCommand(BaseCommand):
     def __init__(self, central_authority_server):
@@ -12,7 +9,9 @@ class SubmissionCommand(BaseCommand):
 
     def execute(self, response, client_connection, args):
         remote_ip = client_connection.get_remote_ip()
+        response["type"] = 'submission'
         if not self.central_authority_server.is_ip_allowed_to_submit(remote_ip):
+            response["error"] = "This IP Address isn't allowed to do submission"
             print("{0} is not allowed to do submission".format(remote_ip))
             return
 
@@ -28,7 +27,7 @@ class SubmissionCommand(BaseCommand):
 
             current_challenge = self.database.get_current_challenge()
             print("Submission accepted for Wallet {0}".format(wallet.id))
-            submission = Submission(current_challenge.id, nonce, wallet)
+            submission = Submission(current_challenge.id, nonce, wallet, remote_ip)
             self.database.add_or_update_submission(submission)
 
         except KeyError as e:

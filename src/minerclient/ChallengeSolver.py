@@ -2,6 +2,7 @@ from coinslib import MT64, seed_from_hash
 import hashlib
 import random
 import threading
+import Grid
 
 
 class ChallengeSolver(threading.Thread):
@@ -63,6 +64,7 @@ class SortedListSolver(ChallengeSolver):
 
             nonce = random.randint(0, 99999999)
 
+
 class ReverseSortedListSolver(ChallengeSolver):
     def __init__(self, challenge):
         ChallengeSolver.__init__(self, 'reverse_sorted_list', challenge)
@@ -96,3 +98,64 @@ class ReverseSortedListSolver(ChallengeSolver):
 
             nonce = random.randint(0, 99999999)
 
+
+class ShortestPathSolver(ChallengeSolver):
+    def __init__(self, challenge):
+        ChallengeSolver.__init__(self, 'shortest_path', challenge)
+
+    def solve(self, parameters, hash_prefix, previous_hash):
+        nb_blockers = parameters['nb_blockers']
+        grid_size = parameters['grid_size']
+
+        while self.alive:
+            nonce = random.randint(0, 9999999999)
+            self.feed_prng(previous_hash, nonce)
+
+            grid = Grid.Grid(grid_size)
+
+            # placing initial walls
+            for i in range(grid_size):
+                grid.walls.append((i, 0))
+                grid.walls.append((i, grid_size - 1))
+
+                if i > 0 and i < (grid_size - 1):
+                    grid.walls.append((0, i))
+                    grid.walls.append((grid_size - 1, i))
+
+            start_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
+            while start_pos in grid.walls:
+                start_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
+
+            end_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
+            while end_pos in grid.walls or start_pos == end_pos:
+                end_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
+
+            # placing walls
+            for i in range(nb_blockers):
+                # wall pos (row, col)
+                block_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
+                if block_pos != start_pos and block_pos != end_pos and block_pos not in grid.walls:
+                    grid.walls.append(block_pos)
+
+            #trying to resolve the grid
+            path = []
+            solution_string = ""
+            try:
+                came_from, cost_so_far = Grid.dijkstra_search(grid, start_pos, end_pos)
+                path = Grid.reconstruct_path(came_from, start_pos, end_pos)
+
+                for coord in path:
+                    solution_string += "{0}{1}".format(coord[0], coord[1])
+
+                sha256 = hashlib.sha256()
+                sha256.update(solution_string.encode("ascii"))
+
+                solution_hash = sha256.hexdigest()
+
+                if solution_hash.startswith(hash_prefix):
+                    print("Solution found ! nonce:{0} hash:{1}".format(nonce, solution_hash))
+                    return solution_hash, nonce
+
+            except Exception as e:
+                # No solution exists
+                pass

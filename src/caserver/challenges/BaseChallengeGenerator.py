@@ -17,10 +17,6 @@ class BaseChallengeGenerator:
     def read_parameters(self):
         pass
 
-    def generate(self, previous_hash):
-        """Generate a new problem and the solution"""
-        pass
-
     def generate_solution(self, previous_hash, nonce):
         pass
 

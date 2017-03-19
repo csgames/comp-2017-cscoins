@@ -10,6 +10,7 @@ import ssl
 import decimal
 import ServerDatabase
 import ChallengeThread
+import RequestControl
 
 from Crypto.PublicKey import RSA
 from Crypto.Hash import SHA256
@@ -26,6 +27,9 @@ class ClientConnection:
         self.is_miner = False
         self.messages_to_push = []
 
+    def push_message(self, msg):
+        self.messages_to_push.append(msg)
+
     def get_remote_ip(self):
         return self.websocket.remote_address[0]
 
@@ -35,6 +39,8 @@ class CentralAuthorityServer(object):
     def __init__(self):
         decimal.getcontext().prec = 5
         self.config_file = ConfigurationFile.ConfigurationFile()
+        self.port = 8989
+        self.listen_address = "localhost"
         self.server_socket = None
         self.wallets = []
         self.authority_wallet = None
@@ -47,16 +53,16 @@ class CentralAuthorityServer(object):
         self.ssl_cert = ""
         self.available_challenges = []
         self.prefix_length = 4
-
         self.challenge_thread = None
+        self.max_requests_per_minutes = 30
+        self.initial_cooldown_length = 60
+        self.invalid_submission_allowed = 5 # within 5 minutes
 
         self.min_transaction_amount = 0
         self.submissions_allowed_ips = []
         self.statistic = ServerStatistic.ServerStatistic()
-        self.database = ServerDatabase.ServerDatabase(self.config_file.get_string("db_user", "cacoins"), self.config_file.get_string("db_password", ""), self.config_file.get_string("db_name", "cacoins"))
-
-        #read from config
         self.read_vars_from_config()
+        self.database = ServerDatabase.ServerDatabase(self.config_file.get_string("db_user", "cacoins"), self.config_file.get_string("db_password", ""), self.config_file.get_string("db_name", "cacoins"))
 
         # commands handler
         self.commands_handler = []
@@ -70,6 +76,8 @@ class CentralAuthorityServer(object):
 
     def read_vars_from_config(self):
         self.config_file.read_file()
+        self.port = self.config_file.get_int('port', 8989)
+        self.listen_address = self.config_file.get_string('listen_address', 'localhost')
         self.ssl_on = self.config_file.get_bool('ssl_on', True)
         self.ssl_cert = self.config_file.get_string('ssl_cert', '../server.pem')
 
@@ -79,8 +87,11 @@ class CentralAuthorityServer(object):
         self.minutes_per_challenge = self.config_file.get_decimal('minutes_per_challenge', 15)
 
         self.min_transaction_amount = self.config_file.get_decimal('min_transaction_amount', .00001)
-        self.available_challenges = self.config_file.get_string_tuple('available_challenges', ['sorted_list', 'reverse_sorted_list'])
+        self.available_challenges = self.config_file.get_string_tuple('available_challenges', ['sorted_list', 'reverse_sorted_list', 'shortest_path'])
         self.prefix_length = self.config_file.get_int('prefix_length', 4)
+        self.max_requests_per_minutes = self.config_file.get_int('max_requests_per_minutes', 30)
+        self.initial_cooldown_length = self.config_file.get_int('initial_cooldown_length', 60)
+        self.invalid_submission_allowed = self.config_file.get_int('invalid_submission_allowed', 5)
 
         submissions_ips = self.config_file.get_string('submissions_allowed_ips', '')
         submissions_allowed_ips = []
@@ -129,6 +140,7 @@ class CentralAuthorityServer(object):
         remote_addr = websocket.remote_address
         self.clients.append(client_connection)
 
+        recv_task = None
         while not client_connection.status == ClientConnection.Closed:
             # messages pending to be push to the client
             if len(client_connection.messages_to_push) > 0:
@@ -137,8 +149,26 @@ class CentralAuthorityServer(object):
 
                 client_connection.messages_to_push = []
 
-            message = await websocket.recv()
+            message = ""
+            if recv_task is None:
+                recv_task = asyncio.ensure_future(websocket.recv())
+                continue
+            elif recv_task.done():
+                message = recv_task.result()
+                recv_task = None
+            else:
+                await asyncio.sleep(0.2)
+                continue
+
+            #checking for cooldown
+            if self.database.is_client_on_cooldown(remote_addr[0]):
+                response = json.dumps({'error': '{0} is currently under a cooldown for request abuse.'.format(remote_addr[0])})
+                await websocket.send(response)
+                continue
+
             command_obj = json.JSONDecoder().decode(message)
+            client_request = RequestControl.ClientRequest(remote_addr[0], message)
+            self.database.add_client_request(client_request)
 
             try:
                 command = command_obj["command"]
@@ -152,7 +182,23 @@ class CentralAuthorityServer(object):
                 
                 print("({0}:{1}) Executing command : {2}".format(remote_addr[0], remote_addr[1], command))
 
-                response = await self.execute_client_command(client_connection, command, args)
+                request_count = self.database.get_client_request_count(remote_addr[0])
+
+                if request_count <= self.max_requests_per_minutes:
+                    try:
+                        response = await self.execute_client_command(client_connection, command, args)
+                    except Exception as e:
+                        print("Error during execute_client_command: {0}".format(e))
+                else:
+                    cooldown_length = self.initial_cooldown_length
+                    lastest_cooldown = self.database.get_client_latest_cooldown(remote_addr[0])
+                    if lastest_cooldown is not None:
+                        cooldown_length = lastest_cooldown.length * 2
+                    print("Client {0} has been put on a cooldown for {1} minutes. (Too much requests per minutes)".format(remote_addr[0], int(cooldown_length/60)))
+                    client_cooldown = RequestControl.ClientCooldown(remote_addr[0], cooldown_length)
+                    self.database.add_client_cooldown(client_cooldown)
+
+                    response = json.dumps({'error': 'Too much requests in one minute, you\'ve been put on cooldown for {0} minutes'.format(cooldown_length/60)})
 
                 if client_connection.status == ClientConnection.Closing:
                     await websocket.close()
@@ -185,7 +231,7 @@ class CentralAuthorityServer(object):
     def push_message_to_miners(self, message):
         for c in self.clients:
             if c.is_miner:
-                c.messages_to_push.append(message)
+                c.push_message(message)
 
     def initialize(self):
         if not os.path.exists('ca_key.priv') and not os.path.exists('ca_key.pub'):
@@ -316,9 +362,9 @@ class CentralAuthorityServer(object):
         if self.ssl_on:
             ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_SSLv23)
             ssl_context.load_cert_chain(self.ssl_cert)
-            self.server_socket = websockets.serve(self.handle_connection, 'localhost', 8989, ssl=ssl_context)
+            self.server_socket = websockets.serve(self.handle_connection, self.listen_address, self.port, ssl=ssl_context)
         else:
-            self.server_socket = websockets.serve(self.handle_connection, 'localhost', 8989)
+            self.server_socket = websockets.serve(self.handle_connection, self.listen_address, self.port)
 
         try:
             asyncio.get_event_loop().run_until_complete(self.server_socket)

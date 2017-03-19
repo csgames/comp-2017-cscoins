@@ -10,6 +10,7 @@ class RegisterWalletCommand(BaseCommand):
         self.database = self.central_authority_server.database
 
     def execute(self, response, client_connection, args):
+        response["type"] = 'register_wallet'
         try:
             name = args['name']
             key = args['key']
@@ -24,7 +25,7 @@ class RegisterWalletCommand(BaseCommand):
             existing_wallet = self.database.get_wallet_by_id(wallet_id)
 
             if existing_wallet is not None:
-                response["error"] = "Wallet {0} already registered"
+                response["error"] = "Wallet {0} already registered".format(wallet_id)
                 return
 
             # verifying the signature

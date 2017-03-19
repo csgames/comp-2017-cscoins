@@ -8,6 +8,7 @@ class GetChallengeSolutionCommand(BaseCommand):
         self.database = self.central_authority_server.database
 
     def execute(self, response, client_connection, args):
+        response["type"] = 'challenge_solution'
         try:
             challenge_id = int(args['challenge_id'])
 

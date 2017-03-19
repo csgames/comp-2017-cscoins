@@ -34,9 +34,7 @@ class Grid:
 
     def neighbors(self, pos):
         (row, col) = pos
-        results = [ (row+1, col), (row-1, col), (row, col+1), (row, col-1)]
-        if (row + col) % 2 == 0:
-            results.reverse()
+        results = [(row+1, col), (row-1, col), (row, col+1), (row, col-1)]
 
         results = filter(self.in_range, results)
         results = filter(self.walkable, results)
@@ -96,41 +94,92 @@ def reconstruct_path(came_from, start_pos, end_pos):
 class ShortestPathChallenge(BaseChallengeGenerator):
     def __init__(self, config_file):
         BaseChallengeGenerator.__init__(self, 'shortest_path', config_file)
-        self.parameters["grid_size"] = 100
-        self.parameters["nb_blockers"] = 5000
+        self.debug_output = False
+        self.read_parameters()
+
+    def read_parameters(self):
+        self.config_file.read_file()
+        self.parameters["grid_size"] = self.config_file.get_int('shortest_path.grid_size', 25)
+        self.parameters["nb_blockers"] = self.config_file.get_int('shortest_path.nb_blockers', 80)
+        self.debug_output = self.config_file.get_bool('shortest_path.debug_output', False)
+        self.read_nonce_limit()
+
+    def save_grid(self, grid, start_pos, end_pos, nonce, path):
+        fp = open('grid_{0}.txt'.format(nonce), 'w')
+
+        for row in range(self.parameters["grid_size"]):
+            line = ""
+            for col in range(self.parameters["grid_size"]):
+                if (row, col) in grid.walls:
+                    line += "x "
+                elif (row, col) == start_pos:
+                    line += "s "
+                elif (row, col) == end_pos:
+                    line += "e "
+                elif (row, col) in path:
+                    line += "p "
+                else:
+                    line += "  "
+
+            fp.write(line + "\n")
+
+        fp.close()
 
     def generate(self, previous_hash):
-        # generate a nonce
-        nonce = random.randint(1000, 10000) # put that into a configuration file
-        print("Generating {0} problem nonce = {1}".format(self.problem_name, nonce))
+        self.read_parameters()
+        solution = None
+        while True:
+            nonce = random.randint(self.nonce_min, self.nonce_max)
+            print("Generating {0} problem nonce = {1}".format(self.problem_name, nonce))
+            try:
+                solution = self.generate_solution(previous_hash, nonce)
+                break
+            except Exception as e:
+                print("No solution exists with nonce = {0}".format(nonce))
+
+        return solution
+
+    def generate_solution(self, previous_hash, nonce):
+        solution_string = ""
 
         grid = Grid(self.parameters["grid_size"])
         seed_hash = self.generate_seed_hash(previous_hash, nonce)
         # seed is the last solution hash suffix, else it's 0
         prng = coinslib.MT64(coinslib.seed_from_hash(seed_hash))
 
+        for i in range(self.parameters["grid_size"]):
+            # placing extremity walls
+            grid.walls.append((i, 0))
+            grid.walls.append((i, self.parameters["grid_size"] - 1))
+
+            if i > 0 and i < (self.parameters["grid_size"] - 1):
+                grid.walls.append((0, i))
+                grid.walls.append((self.parameters["grid_size"] - 1, i))
+
         start_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
+        while start_pos in grid.walls:
+            start_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
+
         end_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
+        while end_pos in grid.walls or start_pos == end_pos:
+            end_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
 
         # placing walls
         for i in range(self.parameters["nb_blockers"]):
             # wall pos (row, col)
             block_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
-            if block_pos != start_pos and block_pos != end_pos:
+            if block_pos != start_pos and block_pos != end_pos and block_pos not in grid.walls:
                 grid.walls.append(block_pos)
 
-        # starting and ending position
-        solution_string = ""
+        path = []
+        came_from, cost_so_far = dijkstra_search(grid, start_pos, end_pos)
+        path = reconstruct_path(came_from, start_pos, end_pos)
 
-        try:
-            came_from, cost_so_far = dijkstra_search(grid, start_pos, end_pos)
-            path = reconstruct_path(came_from, start_pos, end_pos)
-            # print(path)
-            for coord in path:
-                solution_string += "{0}{1}".format(coord[0], coord[1])
-        except Exception as e:
-            print("Shortest Path Challenge error: {0}".format(e))
-            # No solution exists, so solution string should be empty
+        for coord in path:
+            solution_string += "{0}{1}".format(coord[0], coord[1])
+
+        if self.debug_output:
+            self.save_grid(grid, start_pos, end_pos, nonce, path)
 
         hash = self.generate_hash(solution_string)
         return Challenge(self.problem_name, nonce, solution_string, hash, self.parameters)
