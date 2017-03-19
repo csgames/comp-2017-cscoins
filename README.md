@@ -37,7 +37,7 @@ When a miner fetches the current challenge from the Central Authority, a challen
 
 Along with the challenge name, the Central Authority server might also specify additional parameters for the challenge. For example, the sorted list challenge will have the `"nb_elements"` parameter. This parameter will tell the miner how many numbers need to be generated for the challenge.
 
-Once the miner has the challenge parameters, it can start generating the challenge dataset. It does so by generating `nb_elements` 64 bits unsigned integer with the Pseudo Random Number Generator. The seed state used by the PRNG is the first 8 bytes of the SHA256 Hash of the concatenation of the last solution hash (in stringified hex) and a given nonce (`SHA256(HEX(LastSolutionHash) | Nonce)[:8]`). The nonce is a 64bit unsigned integer.
+Once the miner has the challenge parameters, it can start generating the challenge dataset. It does so by generating `nb_elements` 64 bits unsigned integer with the Pseudo Random Number Generator. The seed state used by the PRNG is the first 8 bytes of the SHA256 Hash of the concatenation of the last solution hash (in stringified hex) and a given nonce (`SHA256(HEX(LastSolutionHash) | Nonce)[:8]`). The nonce is the decimal representation of a chosen unsigned 64-bit integer.
 
 Once the challenge dataset is generated, the miner has to solve the challenge. In the sorted list challenge, it must sort the elements to generate a solution string. To build that string, the miner has to put all values of the list in sorted order, convert them to their string representation (in base 10) and concatenate them together.
 **Example**: Given a list of 5 numbers, `[9, 4, 5, 9, 2]`. The sorted list solution string is: `"24599"`.
