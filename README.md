@@ -244,7 +244,7 @@ To calculate a client's Wallet balance, a client needs to retrieve all the trans
 
 ### Message Signature
 
-We are using RSA digital signature protocol according to PKCS#1 v1.5. Some messages required a signature to validate that the client is the owner of the wallet. Usually, the signed contents are the arguments of the command, joined together by a comma (`,`). A signature is always represented in a stringified hexadecimal format. The Central Authority server will validate the signature against the registered public key by the client.
+We are using RSA digital signature protocol according to PKCS#1 v1.5. Some messages required a signature to validate that the client is the owner of the wallet. Usually, the signed contents are the arguments of the command, joined together by a comma (`,`). After, the contents in hashed using SHA256, and you sign the digest generated. A signature is always represented in a stringified hexadecimal format. The Central Authority server will validate the signature against the registered public key by the client.
 
 ### Communication with the Central Authority
 

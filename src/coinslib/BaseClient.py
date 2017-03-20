@@ -64,13 +64,9 @@ class BaseClient:
         else:
             self.socket = await websockets.client.connect("ws://{0}:{1}/client".format(self.hostname, self.port))
 
-    async def submit(self, challenge_id, nonce, hash):
-        # signature
-        hasher = SHA256.new()
-        hasher.update("{0},{1},{2}".format(challenge_id, nonce, hash).encode("ascii"))
-        signature = self.sign_message(hasher)
+    async def submit(self, nonce):
 
-        command = {'command': 'submission', 'args': {'challenge_id': challenge_id, 'nonce': nonce, 'hash': hash, 'signature': signature, 'wallet_id': self.wallet_id}}
+        command = {'command': 'submission', 'args': {'nonce': nonce, 'wallet_id': self.wallet_id}}
         message = json.dumps(command)
         await self.socket.send(message)
 

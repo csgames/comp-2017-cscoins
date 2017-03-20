@@ -96,7 +96,7 @@ class MinerClient(BaseClient):
 
                 if mine_task in done:
                     solution = mine_task.result()
-                    result = await self.submit(current_challenge.id, solution[1], solution[0])
+                    result = await self.submit(solution[1])
                     if result is not None:
                         # we got a new challenge, right after the submission
                         recv_task.cancel()
