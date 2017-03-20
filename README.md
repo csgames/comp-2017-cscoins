@@ -342,7 +342,7 @@ Register your Wallet's public key with the Central Authority.
 |----------|----|-----------|
 |name|String|Your Wallet Name, you should use your Team Name here.|
 |key|String|Your wallet's public key, in [PEM](https://en.wikipedia.org/wiki/Privacy-enhanced_Electronic_Mail) format.|
-|signature|String|[Message signature](#message-signature) in hexadecimal format. The signed message used is the `wallet_id` being registered.|
+|signature|String|[Message signature](#message-signature) in hexadecimal format. The message used for the signature is the public key in DER format.|
 
 ##### Response
 
