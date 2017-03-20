@@ -74,8 +74,8 @@ class ChallengeThread(threading.Thread):
             self.current_challenge.started_on = int(time.time())
             self.database.update_challenge(self.current_challenge)
             print("New challenge generated for {0} minutes".format(self.current_challenge.duration))
-        else:
-            self.current_challenge.fill_prefix(self.central_authority_server.prefix_length)
+
+        self.current_challenge.fill_prefix(self.central_authority_server.prefix_length)
 
     def run(self):
         while self.alive:
@@ -153,17 +153,17 @@ class ChallengeThread(threading.Thread):
         self.database.add_invalid_submission(invalid_submission)
 
         # fetching the invalid_submission_count
-        invalid_submission_count = self.database.get_invalid_submission_count(submission.remote_ip)
+        invalid_submission_count = self.database.get_invalid_submission_count(submission.wallet.nid)
         if invalid_submission_count >= self.central_authority_server.invalid_submission_allowed:
             # add a client cooldown
             cooldown_length = self.central_authority_server.initial_cooldown_length
-            last_cooldown = self.database.get_client_latest_cooldown(submission.remote_ip)
+            last_cooldown = self.database.get_submission_latest_cooldown(submission.wallet.nid)
             if last_cooldown is not None:
                 cooldown_length = last_cooldown.length * 2
 
-            client_cooldown = RequestControl.ClientCooldown(submission.remote_ip, cooldown_length)
-            self.database.add_client_cooldown(client_cooldown)
-            print("Client {0} has been put on a cooldown for {1} minutes (Too much invalid submissions)".format(submission.remote_ip, int(cooldown_length / 60)))
+            submission_cooldown = RequestControl.SubmissionCooldown(submission.wallet.nid, cooldown_length)
+            self.database.add_submission_cooldown(submission_cooldown)
+            print("Client {0} has been put on a cooldown for {1} minutes (Too much invalid submissions)".format(submission.wallet.nid, int(cooldown_length / 60)))
 
     def end_challenge(self):
         last_challenge = self.current_challenge

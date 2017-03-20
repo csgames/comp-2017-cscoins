@@ -11,6 +11,7 @@ db_name=cacoins
 coins_per_challenge=200
 minutes_per_challenge=15
 max_requests_per_minutes=30
+supervisor_key=test
 
 available_challenges=sorted_list,reverse_sorted_list,shortest_path
 prefix_length=4

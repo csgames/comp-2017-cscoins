@@ -91,9 +91,25 @@ class ServerDatabase:
         cur.execute("""CREATE TABLE IF NOT EXISTS `invalid_submissions` (
                     `invalid_submission_id` INT NOT NULL AUTO_INCREMENT,
                     `remote_ip` VARCHAR(96) NOT NULL,
-                    `wallet_nid` VARCHAR(64) NOT NULL,
+                    `wallet_nid` INT NOT NULL,
                     `verified_on` INT NOT NULL,
                     PRIMARY KEY (`invalid_submission_id`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=latin1;""")
+
+        cur.execute("""CREATE TABLE IF NOT EXISTS `submissions_cooldown` (
+                    `submission_cooldown_id` INT NOT NULL AUTO_INCREMENT,
+                    `wallet_nid` INT NOT NULL,
+                    `cooldown_length` INT NOT NULL,
+                    `end_on` INT NOT NULL,
+                    PRIMARY KEY (`submission_cooldown_id`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=latin1;""")
+
+        cur.execute("""CREATE TABLE IF NOT EXISTS `challenge_disqualifications` (
+                    `challenge_disqualification_id` INT NOT NULL AUTO_INCREMENT,
+                    `wallet_nid` INT NOT NULL,
+                    `challenge_id` INT NOT NULL,
+                    `added_on` INT NOT NULL,
+                    PRIMARY KEY (`challenge_disqualification_id`)
                     ) ENGINE=InnoDB DEFAULT CHARSET=latin1;""")
 
         cur.execute("""DELETE FROM wallet_balances;""")
@@ -113,14 +129,14 @@ class ServerDatabase:
 
         return conn
 
-    def get_invalid_submission_count(self, remote_ip):
+    def get_invalid_submission_count(self, wallet_nid):
         time_start = int(time.time()) - (5 * 60)
         invalid_submission_count = 0
         conn = self.connect()
         cur = conn.cursor()
 
-        query = """SELECT COUNT(invalid_submission_id) FROM invalid_submissions WHERE remote_ip = %s AND verified_on >= %s"""
-        cur.execute(query, (remote_ip, time_start, ))
+        query = """SELECT COUNT(invalid_submission_id) FROM invalid_submissions WHERE wallet_nid = %s AND verified_on >= %s"""
+        cur.execute(query, (wallet_nid, time_start, ))
 
         row = cur.fetchone()
         if row:
@@ -129,6 +145,35 @@ class ServerDatabase:
         cur.close()
         conn.close()
         return invalid_submission_count
+
+    def add_challenge_disqualification(self, challenge_disqualification):
+        conn = self.connect()
+        cur = conn.cursor()
+
+        query = """INSERT INTO challenge_disqualifications (challenge_id, wallet_nid, added_on) VALUES (%s, %s, %s)"""
+
+        cur.execute(query, (challenge_disqualification.challenge_id, challenge_disqualification.wallet_nid, challenge_disqualification.added_on, ))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    def is_wallet_disqualified(self, challenge_id, wallet_nid):
+        disqualified = False
+        conn = self.connect()
+        cur = conn.cursor()
+
+        query = """SELECT wallet_nid FROM challenge_disqualifications WHERE challenge_id = %s AND wallet_nid = %s"""
+
+        cur.execute(query, (challenge_id, wallet_nid, ))
+
+        row = cur.fetchone()
+        if row:
+            disqualified = True
+
+        cur.close()
+        conn.close()
+        return disqualified
 
     def add_invalid_submission(self, invalid_submission):
         conn = self.connect()
@@ -140,6 +185,36 @@ class ServerDatabase:
         conn.commit()
         cur.close()
         conn.close()
+
+    def add_submission_cooldown(self, submission_cooldown):
+        conn = self.connect()
+        cur = conn.cursor()
+
+        query = """INSERT INTO submissions_cooldown (wallet_nid, cooldown_length, end_on) VALUES (%s, %s, %s)"""
+
+        cur.execute(query, (submission_cooldown.wallet_nid, submission_cooldown.length, submission_cooldown.end_on, ))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    def get_submission_latest_cooldown(self, wallet_nid):
+        submission_cooldown = None
+        conn = self.connect()
+        cur = conn.cursor()
+
+        query = """SELECT submission_cooldown_id, wallet_nid, cooldown_length, end_on FROM submissions_cooldown WHERE wallet_nid = %s ORDER BY submission_cooldown_id DESC"""
+
+        cur.execute(query, (wallet_nid,))
+
+        row = cur.fetchone()
+        if row:
+            submission_cooldown = RequestControl.SubmissionCooldown(row[1], row[2], row[3], row[0])
+
+        cur.close()
+        conn.close()
+
+        return submission_cooldown
 
     def get_client_latest_cooldown(self, remote_ip):
         client_cooldown = None
@@ -158,6 +233,25 @@ class ServerDatabase:
         conn.close()
 
         return client_cooldown
+
+    def is_client_on_submission_cooldown(self, wallet_nid):
+        timestamp = int(time.time())
+        is_on_cooldown = False
+        conn = self.connect()
+        cur = conn.cursor()
+
+        query = """SELECT submission_cooldown_id FROM submissions_cooldown WHERE wallet_nid = %s AND end_on > %s"""
+        cur.execute(query, (wallet_nid, timestamp, ))
+
+        row = cur.fetchone()
+
+        if row:
+            is_on_cooldown = True
+
+        cur.close()
+        conn.close()
+
+        return is_on_cooldown
 
     def is_client_on_cooldown(self, remote_ip):
         timestamp = int(time.time())

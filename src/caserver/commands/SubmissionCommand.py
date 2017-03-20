@@ -26,8 +26,17 @@ class SubmissionCommand(BaseCommand):
                 return
 
             current_challenge = self.database.get_current_challenge()
-            print("Submission accepted for Wallet {0}".format(wallet.id))
             submission = Submission(current_challenge.id, nonce, wallet, remote_ip)
+
+            if self.database.is_client_on_submission_cooldown(wallet.nid):
+                response["error"] = "Submission for this wallet on cooldown ! Too much invalid submissions"
+                return
+
+            if self.database.is_wallet_disqualified(current_challenge.id, wallet.nid):
+                response["error"] = "Wallet disqualified for the current challenge"
+                return
+
+            print("Submission accepted for Wallet {0}".format(wallet.id))
             self.database.add_or_update_submission(submission)
 
         except KeyError as e:

@@ -57,6 +57,7 @@ class CentralAuthorityServer(object):
         self.max_requests_per_minutes = 30
         self.initial_cooldown_length = 60
         self.invalid_submission_allowed = 5 # within 5 minutes
+        self.supervisor_key = ''
 
         self.min_transaction_amount = 0
         self.submissions_allowed_ips = []
@@ -92,6 +93,7 @@ class CentralAuthorityServer(object):
         self.max_requests_per_minutes = self.config_file.get_int('max_requests_per_minutes', 30)
         self.initial_cooldown_length = self.config_file.get_int('initial_cooldown_length', 60)
         self.invalid_submission_allowed = self.config_file.get_int('invalid_submission_allowed', 5)
+        self.supervisor_key = self.config_file.get_string('supervisor_key', '')
 
         submissions_ips = self.config_file.get_string('submissions_allowed_ips', '')
         submissions_allowed_ips = []
@@ -216,6 +218,32 @@ class CentralAuthorityServer(object):
 
             await asyncio.sleep(0.5)
 
+    async def handle_supervisor(self, websocket):
+        while True:
+            try:
+                msg = await websocket.recv()
+                message = json.loads(msg)
+
+                supervisor_key = message['supervisor_key']
+                wallet_id = message['wallet_id']
+                if supervisor_key == self.supervisor_key:
+                    current_challenge = self.database.get_current_challenge()
+                    if current_challenge is None:
+                        continue
+
+                    wallet = self.database.get_wallet_by_id(wallet_id)
+
+                    if wallet is not None:
+                        disqualification = RequestControl.ChallengeDisqualification(wallet.nid, current_challenge.id)
+                        self.database.add_challenge_disqualification(disqualification)
+                        print("Wallet {0} is disqualified for challenge {1}".format(wallet.id, current_challenge.id))
+
+            except Exception as e:
+                print("Error in handle_supervisor : {0}".format(e))
+                break
+
+            await asyncio.sleep(0.5)
+
     async def handle_connection(self, websocket, path):
         remote_addr = websocket.remote_address
         print("Accepting a connection from {0}:{1}".format(remote_addr[0], remote_addr[1]))
@@ -223,6 +251,8 @@ class CentralAuthorityServer(object):
         try:
             if path == '/client':
                 await self.handle_client(websocket)
+            elif path == '/supervisor':
+                await self.handle_supervisor(websocket)
             else:
                 websocket.close()
         except Exception as e:
