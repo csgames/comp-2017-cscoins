@@ -7,9 +7,10 @@ import asyncio
 
 
 class MinerClient(BaseClient):
-    def __init__(self, key_dirs="", hostname="localhost"):
+    def __init__(self, key_dirs="", hostname="localhost", wallet_name="SimpleMiner"):
         BaseClient.__init__(self, hostname)
         self.keys_dir = key_dirs
+        self.wallet_name = wallet_name
         self.time_limit = 0
         self.solvers = {}
         self.solvers["sorted_list"] = ChallengeSolver.SortedListSolver
@@ -72,6 +73,8 @@ class MinerClient(BaseClient):
     async def wait_for_new_challenge(self):
         msg = await self.socket.recv()
         response = json.loads(msg)
+        if 'error' in response:
+            print(response['error'])
         current_challenge = Challenge()
         try:
             current_challenge = Challenge()
@@ -86,6 +89,7 @@ class MinerClient(BaseClient):
     async def mine_loop(self):
         print("Fetching current challenge")
         current_challenge = await self.get_challenge()
+
         while True:
             new_challenge = False
             while not new_challenge:

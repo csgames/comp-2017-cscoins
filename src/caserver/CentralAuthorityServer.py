@@ -58,6 +58,7 @@ class CentralAuthorityServer(object):
         self.initial_cooldown_length = 60
         self.invalid_submission_allowed = 5 # within 5 minutes
         self.supervisor_key = ''
+        self.emit_coins = False
 
         self.min_transaction_amount = 0
         self.submissions_allowed_ips = []
@@ -94,6 +95,7 @@ class CentralAuthorityServer(object):
         self.initial_cooldown_length = self.config_file.get_int('initial_cooldown_length', 60)
         self.invalid_submission_allowed = self.config_file.get_int('invalid_submission_allowed', 5)
         self.supervisor_key = self.config_file.get_string('supervisor_key', '')
+        self.emit_coins = self.config_file.get_bool('emit_coins', True)
 
         submissions_ips = self.config_file.get_string('submissions_allowed_ips', '')
         submissions_allowed_ips = []

@@ -121,6 +121,9 @@ class ChallengeThread(threading.Thread):
 
                             # giving some coins !
                             coin_value = decimal.Decimal(self.current_challenge.coin_value)
+                            if not self.central_authority_server.emit_coins:
+                                # overriding coin value for 0
+                                coin_value = decimal.Decimal(0)
 
                             recipient_wallet = self.database.get_wallet_by_nid(submission.wallet.nid)
 

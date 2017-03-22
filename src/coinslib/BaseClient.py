@@ -172,5 +172,4 @@ class BaseClient:
         await self.socket.send(message)
         message = await self.socket.recv()
         response = json.loads(message)
-
-        print(response)
+        return response

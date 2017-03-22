@@ -2,8 +2,7 @@
 listen_address=localhost
 port=8989
 ssl_cert=../server.pem
-ssl_on=False
-
+ssl_on=True
 db_user=cacoins
 db_password=
 db_name=cacoins
@@ -12,7 +11,7 @@ coins_per_challenge=200
 minutes_per_challenge=15
 max_requests_per_minutes=30
 supervisor_key=test
-
+emit_coins=True
 available_challenges=sorted_list,reverse_sorted_list,shortest_path
 prefix_length=4
 initial_cooldown_length=60

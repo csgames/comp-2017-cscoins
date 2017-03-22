@@ -16,6 +16,10 @@ The concept is to create a nano-economy for the CS Games event through the imple
 
 CSCoins are a currency gained by solving a challenge.  Unlike distributed peer-to-peer currencies such as [Bitcoin](https://en.wikipedia.org/wiki/Bitcoin), a server authority hosted by the organization committee will handle the challenge distribution and synchronization between all peers. The server authority will be proposing a challenge to be solved and awarding CSCoins for the first miner's wallet to solve it, after which a new challenge will be proposed.
 
+## Miners environment
+
+For more information about the environment visit [docker-client/readme.md](https://github.com/csgames/cscoins/blob/master/docker-client/README.md)
+
 ## Contents
 
 *   [Pseudo Random Number Generator](#random-number-generator)
