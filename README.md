@@ -18,7 +18,7 @@ CSCoins are a currency gained by solving a challenge.  Unlike distributed peer-t
 
 ## Miners environment
 
-For more information about the environment visit [docker-client/readme.md](https://github.com/csgames/cscoins/blob/master/docker-client/README.md)
+For more information about the environment visit [docker-client/readme.md](https://github.com/csgames/cscoins/blob/master/docker-client/readme.md)
 
 ## Contents
 
