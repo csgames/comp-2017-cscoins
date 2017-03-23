@@ -50,7 +50,7 @@ class ServerDatabase:
                         `challenge_id` INT NOT NULL AUTO_INCREMENT,
                         `challenge_name` VARCHAR(255) NOT NULL,
                         `solution_string` LONGTEXT NOT NULL,
-                        `nonce` BIGINT NOT NULL,
+                        `nonce` BIGINT UNSIGNED NOT NULL,
                         `coin_value` INT NOT NULL,
                         `hash` varchar(64) NOT NULL,
                         `parameters` TEXT NOT NULL,
