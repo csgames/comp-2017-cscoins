@@ -22,7 +22,6 @@ function generateId() {
 
 var coinsClient = {
 	server_uri: "wss://cscoins.2017.csgames.org:8989/client",
-	//server_uri: "ws://localhost:8989/client",
 	socket: null,
 	wallet_id: null,
 	public_key: null,
@@ -376,7 +375,7 @@ function addTransactionToUI(txn) {
 	
 	txnElement.find('#txn-id').text(txn.id);
 	
-	txnElement.find('#source-address').text(txn.source.substr(0, 32));
+	txnElement.find('#source-address').text(txn.source);
 	txnElement.find('#source-address').attr('title', txn.source);
 	
 	if(txn.source === coinsClient.wallet_id)
@@ -384,7 +383,7 @@ function addTransactionToUI(txn) {
 		txnElement.find('#source-address').attr('class', 'my-wallet-id');
 	}
 	
-	txnElement.find('#recipient-address').text(txn.recipient.substr(0, 32));
+	txnElement.find('#recipient-address').text(txn.recipient);
 	txnElement.find('#recipient-address').attr('title', txn.recipient);
 	
 	if(txn.recipient === coinsClient.wallet_id)
