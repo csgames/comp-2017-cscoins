@@ -48,3 +48,23 @@ We're supposing that Docker client is already installed on your computer.
  6. If you want to stop or update your container, you will need to delete it and return to step 3.
   
     > $ docker --config path/to/config/folder/ rm -f myminer
+
+
+### Wallet
+
+ - You must register your wallet with your University name, else you need to communicate your Wallet Id with the Organization Committee.
+     - We will only evaluate one wallet for your final score !
+
+ - You can manage your wallet [here](https://cscoins.2017.csgames.org), or you can use the Wallet manager provided in the repository on your computer.
+
+
+### Wallet Manager
+
+ - The wallet manager is so basic right now ! If you want to add feature or beautify it, you're free to submit a pull request on the [csgames/cscoins](https://github.com/csgames/cscoins). You'll be awarded some CS Coins for that.
+
+
+### Challenge schedule
+
+ - The miner will be allowed to run overnight, but the Docker proxy will be close until the beginning of competition the next morning, so be sure that your miner can handle some errors to stay online.
+
+ - You will be able to send and receive coins overnight, the wallet manager will stay up.
