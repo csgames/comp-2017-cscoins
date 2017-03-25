@@ -228,10 +228,15 @@ var coinsClient = {
 	},
 	
 	generateWalletId: function() {
-		var pubHex = KEYUTIL.getHexFromPEM(coinsClient.public_key);
-		var hasher = new jsSHA("SHA-256", "HEX");
-		hasher.update(pubHex);
-		coinsClient.wallet_id = hasher.getHash("HEX");
+    try {
+  		var pubHex = KEYUTIL.getHexFromPEM(coinsClient.public_key);
+  		var hasher = new jsSHA("SHA-256", "HEX");
+  		hasher.update(pubHex);
+  		coinsClient.wallet_id = hasher.getHash("HEX");
+      return true;
+    } catch (e) {
+      return false;
+    }
 	},
 	
 	loadKeysFromStorage: function () {
@@ -292,18 +297,23 @@ function hideKeys() {
 function generateWalletId() {
 	coinsClient.public_key = $('#wallet-public-key').val();
 	coinsClient.private_key = $('#wallet-private-key').val();
-	coinsClient.generateWalletId();
-	coinsClient.saveKeysToStorage();
-	$('#wallet-id').text(coinsClient.wallet_id);
 
-    if(coinsClient.transactions.length > 0)
-    {
-        $('#transactions-container .txn').remove();
-        var nb = coinsClient.transactions.length;
-        for(var i=0; i<nb; i++) {
-            addTransactionToUI(coinsClient.transactions[i]);
-        }
+  if (!coinsClient.generateWalletId()) {
+    $('#wallet-id').text("No id for current public/private key");
+    return false;
+  }
+  coinsClient.saveKeysToStorage();
+
+  $('#wallet-id').text(coinsClient.wallet_id);
+
+  if(coinsClient.transactions.length > 0)
+  {
+    $('#transactions-container .txn').remove();
+    var nb = coinsClient.transactions.length;
+    for(var i=0; i<nb; i++) {
+      addTransactionToUI(coinsClient.transactions[i]);
     }
+  }
 }
 
 function showKeys() {
@@ -321,10 +331,11 @@ function init_page() {
             $(this).hide();
         }
     });
-	
-	
+
 	coinsClient.support_storage = support_storage();
 	coinsClient.connect(connect_callback);
+
+  $('.collapsible').collapsible();
 }
 
 function support_storage() {
@@ -346,7 +357,7 @@ function connect_callback(connected) {
 }
 
 function calculateBalance() {
-	if(coinsClient.public_key)
+	if(coinsClient.wallet_id)
 	{
 		var balance = 0;
 		var nbTransactions = coinsClient.transactions.length;
@@ -364,18 +375,21 @@ function calculateBalance() {
 		}
 		
 		$('#wallet-balance').text(balance);
-	}
+	} else {
+    $('#wallet-balance').text("No balance for current coin client");
+  }
 }
 
 function addTransactionToUI(txn) {
-    var transactionsSection = $('#transactions-container');
-	var template = $('#template #txn');
-	
+  var transactionsSection = $('#transactions-container');
+
+	var template = $('#template');
+
 	var txnElement = template.clone();
 	
 	txnElement.find('#txn-id').text(txn.id);
 	
-	txnElement.find('#source-address').text(txn.source);
+	txnElement.find('#source-address').text(txn.source.substring(0, 15) + "...");
 	txnElement.find('#source-address').attr('title', txn.source);
 	
 	if(txn.source === coinsClient.wallet_id)
@@ -383,7 +397,7 @@ function addTransactionToUI(txn) {
 		txnElement.find('#source-address').attr('class', 'my-wallet-id');
 	}
 	
-	txnElement.find('#recipient-address').text(txn.recipient);
+	txnElement.find('#recipient-address').text(txn.recipient.substring(0, 15) + "...");
 	txnElement.find('#recipient-address').attr('title', txn.recipient);
 	
 	if(txn.recipient === coinsClient.wallet_id)
@@ -391,10 +405,12 @@ function addTransactionToUI(txn) {
 		txnElement.find('#recipient-address').attr('class', 'my-wallet-id');
 	}
 	
-	txnElement.find('#txn-amount').text(txn.amount);
+	txnElement.find('#txn-amount').text(Math.round(txn.amount).toFixed(2));
 	
 	txnElement.prop('id', 'txn-'+txn.id);
 	transactionsSection.append(txnElement);
+
+  txnElement.show();
 }
 
 function showHideTransactions() {
@@ -458,34 +474,43 @@ function send_coins() {
 	var amount = $('#transaction-amount').val();
 	
 	var sendCoinsForm = $('#send-coins-form');
-	sendCoinsForm.fadeOut();
-	sendCoinsForm.data('state', 'hidden');
+
+  // reset send coins form
+  $("#transaction-recipient").val('');
+  $("#transaction-amount").val('');
+
+  sendCoinsForm.trigger("reset");
+
+	// sendCoinsForm.fadeOut();
+	// sendCoinsForm.data('state', 'hidden');
 	
+  $('#transaction-information').show();
 	$('#send-coin-pending').fadeIn();
 	
-	coinsClient.create_transaction(recipient, amount);
+  try {
+	  coinsClient.create_transaction(recipient, amount);
+  } catch (e) {
+    transactionFailed("Invalid current coin client");
+  }
 }
 
 function register_wallet() {
-    resetWalletRegistrationStatus();
-    generateWalletId();
-    var walletName = window.prompt("What is the name of this wallet ?", "Unknown");
-    coinsClient.register_wallet(walletName);
-    $('#wallet-registration-pending').show();
-}
+  $('#wallet-registration-information').show();
 
-function resetWalletRegistrationStatus()
-{
-	$('#wallet-registration-information span.label').each(function (index, value){
-		var label = $(value);
-		label.hide();
-		label.data('state', 'hidden');
-	});
+  if (!$("#wallet-public-key").val() || !$("#myTextArea").val()) {
+    walletRegistrationFailed("Please enter your public and private keys");
+  }
+
+  if (!generateWalletId()) {
+    walletRegistrationFailed("Wallet Registration did not succeed for public/private keys.");
+    return false;
+  }
+  var walletName = window.prompt("What is the name of this wallet ?", "Unknown");
+  coinsClient.register_wallet(walletName);
 }
 
 function walletRegistrationFailed(errorMessage) {
-    resetWalletRegistrationStatus();
-    var errorLabel = $('#wallet-registration-error');
+  var errorLabel = $('#wallet-registration-error');
 	errorLabel.text(errorLabel.text().split(':')[0] + ' : ' + errorMessage);
 	errorLabel.fadeIn();
 }
