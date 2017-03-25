@@ -114,7 +114,6 @@ var coinsClient = {
 				{
 					job.data = { current_index: coinsClient.transactions.length, socket: websocket, transactions: [] };
 				}
-
 				websocket.send(JSON.stringify({command: 'get_transactions', args: {start: job.data.current_index, count: 100}}));
 			},
 
@@ -123,10 +122,12 @@ var coinsClient = {
 					console.log(data.error);
 					return;
 				}
-				
+
+        if (job.data.current_index == 0) clearTransactions();
+        
 				for(var i=0; i<data.transactions.length; i++)
 				{
-				    addTransactionToUI(data.transactions[i]);
+				  addTransactionToUI(data.transactions[i]);
 					job.data.transactions.push(data.transactions[i]);
 				}
 
@@ -308,7 +309,7 @@ function generateWalletId() {
 
   if(coinsClient.transactions.length > 0)
   {
-    $('#transactions-container .txn').remove();
+    clearTransactions();
     var nb = coinsClient.transactions.length;
     for(var i=0; i<nb; i++) {
       addTransactionToUI(coinsClient.transactions[i]);
@@ -380,6 +381,10 @@ function calculateBalance() {
   }
 }
 
+function clearTransactions() {
+  $('#transactions-container').text('');
+}
+
 function addTransactionToUI(txn) {
   var transactionsSection = $('#transactions-container');
 
@@ -387,30 +392,34 @@ function addTransactionToUI(txn) {
 
 	var txnElement = template.clone();
 	
-	txnElement.find('#txn-id').text(txn.id);
+	txnElement.find('.txn-id').text(txn.id);
 	
-	txnElement.find('#source-address').text(txn.source.substring(0, 15) + "...");
-	txnElement.find('#source-address').attr('title', txn.source);
+	txnElement.find('.source-address').text(txn.source.substring(0, 15) + "...");
+	txnElement.find('.source-address').attr('title', txn.source);
 	
 	if(txn.source === coinsClient.wallet_id)
 	{
-		txnElement.find('#source-address').attr('class', 'my-wallet-id');
+		txnElement.find('.source-address').addClass('my-wallet-id');
 	}
 	
-	txnElement.find('#recipient-address').text(txn.recipient.substring(0, 15) + "...");
-	txnElement.find('#recipient-address').attr('title', txn.recipient);
+	txnElement.find('.recipient-address').text(txn.recipient.substring(0, 15) + "...");
+	txnElement.find('.recipient-address').attr('title', txn.recipient);
 	
 	if(txn.recipient === coinsClient.wallet_id)
 	{
-		txnElement.find('#recipient-address').attr('class', 'my-wallet-id');
+		txnElement.find('.recipient-address').addClass('my-wallet-id');
 	}
 	
-	txnElement.find('#txn-amount').text(Math.round(txn.amount).toFixed(2));
+	txnElement.find('.txn-amount').text(Math.round(txn.amount).toFixed(2));
 	
 	txnElement.prop('id', 'txn-'+txn.id);
 	transactionsSection.append(txnElement);
 
   txnElement.show();
+
+  // show transactions
+  $("#transactions-loading").hide();
+  $("#transactions-table").show();
 }
 
 function showHideTransactions() {
