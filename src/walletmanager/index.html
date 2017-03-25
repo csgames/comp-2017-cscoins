@@ -19,7 +19,7 @@
       <h4>CS Coins Wallet</h4>
       <ul class="collapsible" data-collapsible="accordion">
          <li>
-            <div class="collapsible-header" onClick="$('#wallet-registration-information').hide();">
+            <div class="collapsible-header">
             	<i class="material-icons">vpn_key</i>Registration
             </div>
       			<div id="wallet-information" class="collapsible-body">
@@ -79,6 +79,7 @@
             <div class="collapsible-header" onclick="showHideTransactions();"><i class="material-icons">trending_up</i>Transactions</div>
             <div class="collapsible-body">
               <div id="transactions-loading">Loading transactions ...</div>
+              <input id="transactions-filter-input" type='text' placeholder="Filter (source/recipient)"/>
             	<table id="transactions-table" style="display:none">
 			        <thead>
 			          <tr>
