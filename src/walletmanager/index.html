@@ -78,7 +78,8 @@
          <li>
             <div class="collapsible-header" onclick="showHideTransactions();"><i class="material-icons">trending_up</i>Transactions</div>
             <div class="collapsible-body">
-            	<table class="stripped">
+              <div id="transactions-loading">Loading transactions ...</div>
+            	<table id="transactions-table" style="display:none">
 			        <thead>
 			          <tr>
 			              <th>Id</th>
@@ -88,13 +89,13 @@
 			          </tr>
 			        </thead>
 			        <tbody id="transactions-container">
-			          <tr id="template" style="display:none">
-			            <td id="txn-id"></div></td>
-			            <td id="source-address">adfkjhasdfsdafag</td>
-			            <td id="recipient-address">lkasouqwr98723h2kljasdf</td>
-			            <td id="txn-amount">0.87</td>
-			          </tr>
 			        </tbody>
+              <tr id="template" style="display:none">
+                  <td class="txn-id"></div></td>
+                  <td class="source-address"></td>
+                  <td class="recipient-address"></td>
+                  <td class="txn-amount"></td>
+              </tr>
 			      </table>
             </div>
          </li>
