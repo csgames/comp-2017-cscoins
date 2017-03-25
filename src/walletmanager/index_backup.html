@@ -1,0 +1,105 @@
+<html>
+  <head>
+    <script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="libs/sha256.js"></script>
+    <script type="text/javascript" src="libs/header.js"></script>  
+    <script type="text/javascript" src="libs/jsrsasign.js"></script>
+    <script type="text/javascript" src="libs/footer.js"></script> 
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <title>CS Coins Wallet Manager</title>
+  </head>
+  <body onload="init_page();">
+    <div class="container">
+      <div id="connection-status" class="row section">
+        <span id="connection-status-pending" class="label label-primary hideable">Connecting to Central Authority Server...</span>
+        <span id="connection-status-connected" class="label label-success hideable" data-state="hidden">Connected</span>
+        <span id="connection-status-disconnected" class="label label-danger hideable" data-state="hidden">Disconnected</span>
+      </div>
+      <div id="job-status" class="row">
+      </div>
+      <div id="wallet-information" class="row section">
+        <div id="wallet-keys-form">
+          <div id="wallet-public-key-field" class="key-field">
+            <label>Wallet Public Key (PEM Format)</label><br/>
+            <textarea id="wallet-public-key" class="key-control" cols="50" rows="8"></textarea>
+          </div>
+          <div id="wallet-private-key-field">
+            <label>Wallet Private Key (PEM Format)</label><br/>
+            <textarea id="wallet-private-key" class="key-control" cols="50" rows="8"></textarea>
+          </div>
+          <button id="register-wallet-btn" onclick="register_wallet();">Register Wallet</button>
+          <div id="wallet-registration-information" class="section">
+            <span id="wallet-registration-pending" class="label label-info hideable" data-state="hidden">Wallet registration in progress...</span>
+            <span id="wallet-registration-error" class="label label-danger hideable" data-state="hidden">Wallet registration failed : </span>
+            <span id="wallet-registration-success" class="label label-success hideable" data-state="hidden">Wallet registered with success</span>
+          </div>
+        </div>
+        <div id="wallet-keys-toggle" class="section">
+          <button id="hide-wallet-keys-btn" onclick="hideKeys();">Hide Wallet Keys</button>
+          <button id="show-wallet-keys-btn" class="hideable" data-state="hidden" onclick="showKeys();">Show Wallet Keys</button>
+        </div>
+        <button onclick="generateWalletId();">Generate Wallet Id</button>
+        <div id="wallet-id-section">
+          Wallet Id : <span id="wallet-id" class="label label-info"></span>
+        </div>
+        <div id="wallet-balance-section">
+          Balance : <span id="wallet-balance" class="label label-info"></span><br/>
+          <button onclick="calculateBalance();">Calculate Wallet Balance</button>
+        </div>
+      </div>
+      <div id="send-coins-toggle" class="row section">
+        <button onclick="toggleSendCoins();">Send coins...</button>
+      </div>
+      <div id="send-coins-section" class="hideable row section" data-state="hidden">
+        <div id="send-coins-form" class="hideable" data-state="visible">
+          <div id="recipient-field">
+            <label>Recipient</label>
+            <input type="text" size="96" id="transaction-recipient" placeholder="Recipient Wallet Id">
+          </div>
+          <div id="amount-field">
+            <label>Amount</label>
+            <input type="text" id="transaction-amount" placeholder="0.00000">
+          </div>
+          <button onclick="send_coins();">Send</button>
+        </div>
+        <div id="transaction-information" class="section">
+          <span id="send-coin-pending" class="label label-info hideable" data-state="hidden">Transaction creation in progress...</span>
+          <span id="send-coin-error" class="label label-danger hideable" data-state="hidden">Transaction failed : </span>
+          <span id="send-coin-success" class="label label-success hideable" data-state="hidden">Transaction success : </span>
+        </div>
+      </div>
+      <div id="transactions-toggle" class="row section">
+        <button onclick="showHideTransactions();">Show/Hide transaction</button>
+      </div>
+      <div id="transactions-section" class="hideable row section" data-state="hidden">
+        <div id="transactions-container" class="container">
+          <div id="txn-header" class="row table-header">
+            <div class="col-md-1">Id</div>
+            <div class="col-md-4">Source</div>
+            <div class="col-md-4">Recipient</div>
+            <div class="col-md-3">Amount</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="template" class="hideable" data-state="hidden">
+      <div id="txn" class="txn row">
+        <div class="col-md-1">
+          <span id="txn-id"></span>
+        </div>
+        <div class="col-md-4">
+          <span id="source-address"></span>
+        </div>
+        <div class="col-md-4">
+          <span id="recipient-address"></span>
+        </div>
+        <div class="col-md-3">
+          <span id="txn-amount"></span> Coin(s)
+        </div>
+      </div>
+    </div>
+    <script text="text/javascript" src="coins-client.js"></script>
+  </body>
+</html>

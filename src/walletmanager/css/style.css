@@ -1,6 +1,7 @@
-.section {
-	margin-top: 10px;
-	margin-bottom: 20px;
+.section
+{
+	padding-top: 15px;
+	padding-bottom: 0px;
 }
 
 .table-header {
@@ -22,4 +23,22 @@
 	font-weight: bold;
 	padding: 2px;
 	border-radius: 2px;
+}
+
+.btn {
+	margin-top: 10px;
+}
+
+.label {
+	/*display: block;*/
+	margin-top: 10px;
+	margin-bottom: -20px;
+}
+
+.key-control {
+	min-height: 200px;
+}
+
+td, th {
+	padding: 5px 5px;
 }
