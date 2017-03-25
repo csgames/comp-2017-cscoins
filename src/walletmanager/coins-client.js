@@ -18,6 +18,8 @@ function generateId() {
 	$('#wallet_id').text(hasher.getHash("HEX"));
 }
 
+var currentTransactionsList = [];
+
 
 
 var coinsClient = {
@@ -123,12 +125,16 @@ var coinsClient = {
 					return;
 				}
 
-        if (job.data.current_index == 0) clearTransactions();
+        if (job.data.current_index == 0) {
+          clearTransactions();
+          currentTransactionsList = [];
+        }
         
 				for(var i=0; i<data.transactions.length; i++)
 				{
 				  addTransactionToUI(data.transactions[i]);
 					job.data.transactions.push(data.transactions[i]);
+          currentTransactionsList.push(data.transactions[i]);
 				}
 
 				if(data.transactions.length < 100)
@@ -310,6 +316,7 @@ function generateWalletId() {
   if(coinsClient.transactions.length > 0)
   {
     clearTransactions();
+    currentTransactionsList = [];
     var nb = coinsClient.transactions.length;
     for(var i=0; i<nb; i++) {
       addTransactionToUI(coinsClient.transactions[i]);
@@ -337,6 +344,10 @@ function init_page() {
 	coinsClient.connect(connect_callback);
 
   $('.collapsible').collapsible();
+
+  $( "#transactions-filter-input" ).keyup(function() {
+    filterTransactions();
+  })
 }
 
 function support_storage() {
@@ -386,6 +397,11 @@ function clearTransactions() {
 }
 
 function addTransactionToUI(txn) {
+  // filter
+  var filter = $("#transactions-filter-input").val();
+
+  if (filter && !(txn.recipient.indexOf(filter) >= 0) && !(txn.source.indexOf(filter) >= 0)) return;
+
   var transactionsSection = $('#transactions-container');
 
 	var template = $('#template');
@@ -422,6 +438,15 @@ function addTransactionToUI(txn) {
   $("#transactions-table").show();
 }
 
+function filterTransactions() {
+  console.log("Filtering stuff");
+  clearTransactions();
+  for(var i=0; i < currentTransactionsList.length; i++)
+  {
+    addTransactionToUI(currentTransactionsList[i]);
+  }
+}
+
 function showHideTransactions() {
     var transactionsSection = $('#transactions-section');
     var status = transactionsSection.data('state')
@@ -439,7 +464,7 @@ function showHideTransactions() {
 }
 
 function toggleSendCoins() {
-    var sendCoinsSection = $('#send-coins-section');
+  var sendCoinsSection = $('#send-coins-section');
 	var sendCoinsForm = $('#send-coins-form');
 	
 	resetSendCoinStatus();
@@ -528,3 +553,4 @@ function walletRegistrationSuccess() {
     resetWalletRegistrationStatus()
     $('#wallet-registration-success').fadeIn();
 }
+
