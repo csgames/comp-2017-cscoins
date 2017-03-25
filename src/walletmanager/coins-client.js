@@ -315,6 +315,8 @@ function generateWalletId() {
       addTransactionToUI(coinsClient.transactions[i]);
     }
   }
+
+    return true;
 }
 
 function showKeys() {
@@ -506,7 +508,7 @@ function send_coins() {
 function register_wallet() {
   $('#wallet-registration-information').show();
 
-  if (!$("#wallet-public-key").val() || !$("#myTextArea").val()) {
+  if (!$("#wallet-public-key").val() || !$("#wallet-private-key").val()) {
     walletRegistrationFailed("Please enter your public and private keys");
   }
 
