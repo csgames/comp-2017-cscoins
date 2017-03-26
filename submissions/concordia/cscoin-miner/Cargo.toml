@@ -1,0 +1,20 @@
+[package]
+name = "cscoin-miner"
+version = "0.1.0"
+authors = ["Alexis Grondin <agrondin1@hotmail.com>", "Alex Frappier Lachapelle <cyberunner23@protonmail.com>"]
+
+[dependencies]
+mersenne_twister = "1.0.0"
+rand = "*"
+rust-crypto = "^0.2"
+byteorder = "1.0.0"
+itertools = "0.5.9"
+crossbeam    = "0.2.10"
+openssl      = "0.7.12"
+rustc-serialize = "0.3.23"
+serde        = "0.9"
+serde_derive = "0.9"
+serde_json   = "0.9"
+websocket    = "0.17.1"
+fnv          = "1.0.5"
+ctrlc = "3.0.1"
