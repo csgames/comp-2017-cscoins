@@ -183,7 +183,7 @@ class CentralAuthorityServer(object):
                     client_connection.status = ClientConnection.Closed
                     print("Connection closed ({0}:{1})".format(remote_addr[0], remote_addr[1]))
                     break
-                
+
                 print("({0}:{1}) Executing command : {2}".format(remote_addr[0], remote_addr[1], command))
 
                 request_count = self.database.get_client_request_count(remote_addr[0])
@@ -258,7 +258,7 @@ class CentralAuthorityServer(object):
             else:
                 websocket.close()
         except Exception as e:
-            print("Error occured with connection {0}:{1}, {2}".format(remote_addr[0], remote_addr[1], e))
+            print("Error occurred with connection {0}:{1}, {2}".format(remote_addr[0], remote_addr[1], e))
 
     def push_message_to_miners(self, message):
         for c in self.clients:
@@ -404,5 +404,3 @@ class CentralAuthorityServer(object):
         except KeyboardInterrupt:
             print("Closing the server")
             asyncio.get_event_loop().close()
-
-
