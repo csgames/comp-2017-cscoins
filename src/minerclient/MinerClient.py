@@ -7,7 +7,8 @@ import asyncio
 
 
 class MinerClient(BaseClient):
-    def __init__(self, key_dirs="", hostname="localhost", wallet_name="SimpleMiner"):
+    def __init__(self, key_dirs="", hostname="localhost",
+                 wallet_name="SimpleMiner"):
         BaseClient.__init__(self, hostname)
         self.keys_dir = key_dirs
         self.wallet_name = wallet_name
@@ -59,10 +60,13 @@ class MinerClient(BaseClient):
             solver = self.solvers[challenge.challenge_name]
 
         except KeyError:
-            print("Solver not found for {0}...".format(challenge.challenge_name))
+            print(
+                "Solver not found for {0}...".format(
+                    challenge.challenge_name))
 
         self.solving_thread = solver(challenge)
-        print("Starting solving thread {0}".format(self.solving_thread.challenge_name))
+        print("Starting solving thread {0}".format(
+            self.solving_thread.challenge_name))
         self.solving_thread.start()
 
         while not self.solving_thread.solution_found and self.solving_thread.alive:
@@ -81,7 +85,7 @@ class MinerClient(BaseClient):
             current_challenge.fill_from_challenge(response)
             self.time_limit = int(time.time()) + int(response['time_left'])
             print("New challenge received")
-        except:
+        except BaseException:
             current_challenge = None
 
         return current_challenge
@@ -93,8 +97,10 @@ class MinerClient(BaseClient):
         while True:
             new_challenge = False
             while not new_challenge:
-                recv_task = asyncio.ensure_future(self.wait_for_new_challenge())
-                mine_task = asyncio.ensure_future(self.solve_challenge(current_challenge))
+                recv_task = asyncio.ensure_future(
+                    self.wait_for_new_challenge())
+                mine_task = asyncio.ensure_future(
+                    self.solve_challenge(current_challenge))
 
                 done, pending = await asyncio.wait([recv_task, mine_task], return_when=asyncio.FIRST_COMPLETED)
 

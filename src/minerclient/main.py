@@ -14,11 +14,11 @@ while i < ia:
     arg = sys.argv[i]
     if arg == '-k':
         if i + 1 < ia:
-            keys_dir = sys.argv[i+1]
+            keys_dir = sys.argv[i + 1]
             i += 1
     elif arg == '-n':
         if i + 1 < ia:
-            wallet_name = sys.argv[i+1]
+            wallet_name = sys.argv[i + 1]
             i += 1
     i += 1
 
