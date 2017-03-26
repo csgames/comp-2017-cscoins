@@ -9,7 +9,8 @@ class WalletDistribution:
 
 
 class DistributionStatistic:
-    def __init__(self, coins_distributed, possible_coins, wallet_distributions=[]):
+    def __init__(self, coins_distributed, possible_coins,
+                 wallet_distributions=[]):
         self.coins_distributed = coins_distributed
         self.possible_coins = possible_coins
         self.wallet_distributions = wallet_distributions

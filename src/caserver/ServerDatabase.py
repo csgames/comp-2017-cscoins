@@ -7,8 +7,10 @@ import decimal
 import json
 from challenges import Challenge, Submission
 
+
 class ServerDatabase:
-    def __init__(self, username, password, db="cacoins", hostname="localhost", port=3306):
+    def __init__(self, username, password, db="cacoins",
+                 hostname="localhost", port=3306):
         self.username = username
         self.password = password
         self.hostname = hostname
@@ -37,7 +39,6 @@ class ServerDatabase:
                       `created_on` int(11) DEFAULT NULL,
                       PRIMARY KEY (`transaction_id`)
                     ) ENGINE=InnoDB DEFAULT CHARSET=latin1;""")
-
 
         cur.execute("""CREATE TABLE IF NOT EXISTS `wallet_balances` (
                         `wallet_balance_id` INT NOT NULL AUTO_INCREMENT,
@@ -123,7 +124,12 @@ class ServerDatabase:
     def connect(self):
         conn = None
         try:
-            conn = MySQLdb.Connect(host=self.hostname, port=self.port, user=self.username, password=self.password, db=self.db)
+            conn = MySQLdb.Connect(
+                host=self.hostname,
+                port=self.port,
+                user=self.username,
+                password=self.password,
+                db=self.db)
         except Exception as e:
             print("MySQL Connection error : {0}".format(e))
 
@@ -152,7 +158,12 @@ class ServerDatabase:
 
         query = """INSERT INTO challenge_disqualifications (challenge_id, wallet_nid, added_on) VALUES (%s, %s, %s)"""
 
-        cur.execute(query, (challenge_disqualification.challenge_id, challenge_disqualification.wallet_nid, challenge_disqualification.added_on, ))
+        cur.execute(
+            query,
+            (challenge_disqualification.challenge_id,
+             challenge_disqualification.wallet_nid,
+             challenge_disqualification.added_on,
+             ))
 
         conn.commit()
         cur.close()
@@ -180,7 +191,12 @@ class ServerDatabase:
         cur = conn.cursor()
 
         query = """INSERT INTO invalid_submissions (remote_ip, wallet_nid, verified_on) VALUES (%s, %s, %s)"""
-        cur.execute(query, (invalid_submission.remote_ip, invalid_submission.wallet_nid, invalid_submission.verified_on,))
+        cur.execute(
+            query,
+            (invalid_submission.remote_ip,
+             invalid_submission.wallet_nid,
+             invalid_submission.verified_on,
+             ))
 
         conn.commit()
         cur.close()
@@ -192,7 +208,12 @@ class ServerDatabase:
 
         query = """INSERT INTO submissions_cooldown (wallet_nid, cooldown_length, end_on) VALUES (%s, %s, %s)"""
 
-        cur.execute(query, (submission_cooldown.wallet_nid, submission_cooldown.length, submission_cooldown.end_on, ))
+        cur.execute(
+            query,
+            (submission_cooldown.wallet_nid,
+             submission_cooldown.length,
+             submission_cooldown.end_on,
+             ))
 
         conn.commit()
         cur.close()
@@ -209,7 +230,8 @@ class ServerDatabase:
 
         row = cur.fetchone()
         if row:
-            submission_cooldown = RequestControl.SubmissionCooldown(row[1], row[2], row[3], row[0])
+            submission_cooldown = RequestControl.SubmissionCooldown(
+                row[1], row[2], row[3], row[0])
 
         cur.close()
         conn.close()
@@ -227,7 +249,8 @@ class ServerDatabase:
 
         row = cur.fetchone()
         if row:
-            client_cooldown = RequestControl.ClientCooldown(row[1], row[2], row[3], row[0])
+            client_cooldown = RequestControl.ClientCooldown(
+                row[1], row[2], row[3], row[0])
 
         cur.close()
         conn.close()
@@ -277,7 +300,12 @@ class ServerDatabase:
         cur = conn.cursor()
 
         query = """INSERT INTO `clients_cooldown` (remote_ip, cooldown_length, end_on) VALUES (%s, %s, %s)"""
-        cur.execute(query, (client_cooldown.remote_ip, client_cooldown.length, client_cooldown.end_on, ))
+        cur.execute(
+            query,
+            (client_cooldown.remote_ip,
+             client_cooldown.length,
+             client_cooldown.end_on,
+             ))
 
         conn.commit()
         cur.close()
@@ -310,7 +338,12 @@ class ServerDatabase:
 
         query = """INSERT INTO clients_request (remote_ip, command, requested_on) VALUES (%s, %s, %s)"""
 
-        cur.execute(query, (client_request.remote_ip, client_request.command, client_request.requested_on, ))
+        cur.execute(
+            query,
+            (client_request.remote_ip,
+             client_request.command,
+             client_request.requested_on,
+             ))
 
         conn.commit()
         cur.close()
@@ -323,7 +356,12 @@ class ServerDatabase:
 
             query = """UPDATE challenges SET status = %s, started_on = %s WHERE challenge_id = %s"""
 
-            cur.execute(query, (challenge.status, challenge.started_on, challenge.id, ))
+            cur.execute(
+                query,
+                (challenge.status,
+                 challenge.started_on,
+                 challenge.id,
+                 ))
 
             conn.commit()
 
@@ -337,7 +375,13 @@ class ServerDatabase:
 
             query = """UPDATE challenges SET nonce = %s, hash = %s, solution_string = %s WHERE challenge_id = %s"""
 
-            cur.execute(query, (challenge.nonce, challenge.hash, challenge.solution_string, challenge.id, ))
+            cur.execute(
+                query,
+                (challenge.nonce,
+                 challenge.hash,
+                 challenge.solution_string,
+                 challenge.id,
+                 ))
 
             conn.commit()
 
@@ -389,7 +433,8 @@ class ServerDatabase:
 
         return challenge
 
-    def get_challenges_by_status(self, start, count=100, status=Challenge.Created):
+    def get_challenges_by_status(
+            self, start, count=100, status=Challenge.Created):
         challenges = []
         conn = self.connect()
         cur = conn.cursor()
@@ -535,19 +580,37 @@ class ServerDatabase:
         timestamp = int(time.time())
 
         query = """SELECT submission_id FROM submissions WHERE challenge_id = %s AND wallet_nid = %s"""
-        rs = cur.execute(query, (submission.challenge_id, submission.wallet.nid,))
+        rs = cur.execute(
+            query, (submission.challenge_id, submission.wallet.nid,))
 
         row = cur.fetchone()
         if row:
             submission.id = row[0]
             query = """UPDATE submissions SET nonce = %s, submitted_on = %s, remote_ip = %s WHERE submission_id = %s"""
-            rs = cur.execute(query, (submission.nonce, timestamp, submission.remote_ip, submission.id, ))
+            rs = cur.execute(
+                query,
+                (submission.nonce,
+                 timestamp,
+                 submission.remote_ip,
+                 submission.id,
+                 ))
         else:
             query = """INSERT INTO submissions (challenge_id, nonce, wallet_nid, submitted_on, remote_ip) VALUES (%s, %s, %s, %s, %s)"""
-            rs = cur.execute(query, (submission.challenge_id, submission.nonce, submission.wallet.nid, timestamp, submission.remote_ip, ))
+            rs = cur.execute(
+                query,
+                (submission.challenge_id,
+                 submission.nonce,
+                 submission.wallet.nid,
+                 timestamp,
+                 submission.remote_ip,
+                 ))
 
             query = """SELECT submission_id FROM submissions WHERE challenge_id = %s AND wallet_nid = %s AND submitted_on = %s"""
-            rs = cur.execute(query, (submission.challenge_id, submission.wallet.nid, timestamp))
+            rs = cur.execute(
+                query,
+                (submission.challenge_id,
+                 submission.wallet.nid,
+                 timestamp))
             row = cur.fetchone()
             if row:
                 submission.id = int(row[0])
@@ -556,7 +619,6 @@ class ServerDatabase:
 
         cur.close()
         conn.close()
-
 
     def delete_submission(self, submission):
         if submission.id <= 0:
@@ -670,7 +732,7 @@ class ServerDatabase:
 
         return w
 
-    def get_wallet_by_address(self, wallet_address): # todo rework this
+    def get_wallet_by_address(self, wallet_address):  # todo rework this
         w = None
         conn = self.connect()
         cur = conn.cursor()
@@ -717,7 +779,9 @@ class ServerDatabase:
         cur = conn.cursor()
 
         query = """INSERT INTO wallet_balances (wallet_nid, wallet_balance) VALUES (%s, %s)"""
-        result = cur.execute(query, (wallet.nid, "{0:.5f}".format(wallet.balance),))
+        result = cur.execute(
+            query, (wallet.nid, "{0:.5f}".format(
+                wallet.balance),))
 
         conn.commit()
         cur.close()
@@ -746,7 +810,9 @@ class ServerDatabase:
         cur = conn.cursor()
 
         query = """UPDATE wallet_balances SET wallet_balance = %s WHERE wallet_nid = %s"""
-        result = cur.execute(query, ("{0:.5f}".format(wallet.balance), wallet.nid,))
+        result = cur.execute(
+            query, ("{0:.5f}".format(
+                wallet.balance), wallet.nid,))
 
         conn.commit()
         cur.close()
@@ -775,13 +841,27 @@ class ServerDatabase:
         cur = conn.cursor()
         query = """INSERT INTO transactions (source, recipient, amount, created_on, signature) VALUES (%s, %s, %s, %s, %s)"""
 
-        result = cur.execute(query, (transaction.source, transaction.recipient, "{0:.5f}".format(transaction.amount), timestamp, transaction.signature))
+        result = cur.execute(
+            query,
+            (transaction.source,
+             transaction.recipient,
+             "{0:.5f}".format(
+                 transaction.amount),
+                timestamp,
+                transaction.signature))
 
         # fetching the id
 
         query = """SELECT transaction_id FROM transactions WHERE source = %s AND recipient = %s AND amount = %s AND created_on = %s"""
 
-        result = cur.execute(query, (transaction.source, transaction.recipient, "{0:.5f}".format(transaction.amount), timestamp,))
+        result = cur.execute(
+            query,
+            (transaction.source,
+             transaction.recipient,
+             "{0:.5f}".format(
+                 transaction.amount),
+                timestamp,
+             ))
 
         conn.commit()
 
@@ -799,7 +879,8 @@ class ServerDatabase:
         cur = conn.cursor()
         query = """INSERT INTO wallets (wallet_id, wallet_name, wallet_key, created_on) VALUES (%s, %s, %s, %s)"""
 
-        result = cur.execute(query, (wallet.id, wallet.name, wallet.key, timestamp,))
+        result = cur.execute(
+            query, (wallet.id, wallet.name, wallet.key, timestamp,))
 
         conn.commit()
         # fetching the nid

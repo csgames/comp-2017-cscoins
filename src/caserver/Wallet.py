@@ -12,4 +12,3 @@ class Wallet(object):
         self.key = key
         self.id = id
         self.balance = decimal.Decimal(0.00)
-

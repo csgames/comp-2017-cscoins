@@ -34,7 +34,8 @@ class Grid:
 
     def neighbors(self, pos):
         (row, col) = pos
-        results = [(row+1, col), (row-1, col), (row, col+1), (row, col-1)]
+        results = [(row + 1, col), (row - 1, col),
+                   (row, col + 1), (row, col - 1)]
 
         results = filter(self.in_range, results)
         results = filter(self.walkable, results)
@@ -99,9 +100,12 @@ class ShortestPathChallenge(BaseChallengeGenerator):
 
     def read_parameters(self):
         self.config_file.read_file()
-        self.parameters["grid_size"] = self.config_file.get_int('shortest_path.grid_size', 25)
-        self.parameters["nb_blockers"] = self.config_file.get_int('shortest_path.nb_blockers', 80)
-        self.debug_output = self.config_file.get_bool('shortest_path.debug_output', False)
+        self.parameters["grid_size"] = self.config_file.get_int(
+            'shortest_path.grid_size', 25)
+        self.parameters["nb_blockers"] = self.config_file.get_int(
+            'shortest_path.nb_blockers', 80)
+        self.debug_output = self.config_file.get_bool(
+            'shortest_path.debug_output', False)
         self.read_nonce_limit()
 
     def save_grid(self, grid, start_pos, end_pos, nonce, path):
@@ -130,7 +134,9 @@ class ShortestPathChallenge(BaseChallengeGenerator):
         solution = None
         while True:
             nonce = random.randint(self.nonce_min, self.nonce_max)
-            print("Generating {0} problem nonce = {1}".format(self.problem_name, nonce))
+            print(
+                "Generating {0} problem nonce = {1}".format(
+                    self.problem_name, nonce))
             try:
                 solution = self.generate_solution(previous_hash, nonce)
                 break
@@ -156,18 +162,38 @@ class ShortestPathChallenge(BaseChallengeGenerator):
                 grid.walls.append((0, i))
                 grid.walls.append((self.parameters["grid_size"] - 1, i))
 
-        start_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
+        start_pos = (
+            prng.extract_number() %
+            self.parameters["grid_size"],
+            prng.extract_number() %
+            self.parameters["grid_size"])
         while start_pos in grid.walls:
-            start_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
+            start_pos = (
+                prng.extract_number() %
+                self.parameters["grid_size"],
+                prng.extract_number() %
+                self.parameters["grid_size"])
 
-        end_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
+        end_pos = (
+            prng.extract_number() %
+            self.parameters["grid_size"],
+            prng.extract_number() %
+            self.parameters["grid_size"])
         while end_pos in grid.walls or start_pos == end_pos:
-            end_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
+            end_pos = (
+                prng.extract_number() %
+                self.parameters["grid_size"],
+                prng.extract_number() %
+                self.parameters["grid_size"])
 
         # placing walls
         for i in range(self.parameters["nb_blockers"]):
             # wall pos (row, col)
-            block_pos = (prng.extract_number() % self.parameters["grid_size"], prng.extract_number() % self.parameters["grid_size"])
+            block_pos = (
+                prng.extract_number() %
+                self.parameters["grid_size"],
+                prng.extract_number() %
+                self.parameters["grid_size"])
             if block_pos != start_pos and block_pos != end_pos and block_pos not in grid.walls:
                 grid.walls.append(block_pos)
 
@@ -182,4 +208,5 @@ class ShortestPathChallenge(BaseChallengeGenerator):
             self.save_grid(grid, start_pos, end_pos, nonce, path)
 
         hash = self.generate_hash(solution_string)
-        return Challenge(self.problem_name, nonce, solution_string, hash, self.parameters)
+        return Challenge(self.problem_name, nonce,
+                         solution_string, hash, self.parameters)

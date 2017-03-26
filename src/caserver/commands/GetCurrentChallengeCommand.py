@@ -2,15 +2,20 @@ from .BaseCommand import BaseCommand
 import time
 from caserver.challenges import Challenge
 
+
 class GetCurrentChallengeCommand(BaseCommand):
     def __init__(self, central_authority_server):
-        BaseCommand.__init__(self, central_authority_server, 'get_current_challenge')
+        BaseCommand.__init__(
+            self,
+            central_authority_server,
+            'get_current_challenge')
         self.database = self.central_authority_server.database
 
     def execute(self, response, client_connection, args):
         response["type"] = 'current_challenge'
         current_challenge = self.database.get_current_challenge()
-        last_solution = self.database.get_challenge_by_id(current_challenge.id - 1, Challenge.Ended)
+        last_solution = self.database.get_challenge_by_id(
+            current_challenge.id - 1, Challenge.Ended)
 
         # subscribing to new challenge message push
         if client_connection is not None:
@@ -21,7 +26,8 @@ class GetCurrentChallengeCommand(BaseCommand):
             response['challenge_id'] = current_challenge.id
             response['challenge_name'] = current_challenge.challenge_name
             response['parameters'] = current_challenge.parameters
-            current_challenge.fill_prefix(self.central_authority_server.prefix_length)
+            current_challenge.fill_prefix(
+                self.central_authority_server.prefix_length)
             response['hash_prefix'] = current_challenge.hash_prefix
             if last_solution is None:
                 response['last_solution_hash'] = "0" * 64

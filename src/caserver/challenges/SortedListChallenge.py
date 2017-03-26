@@ -11,7 +11,8 @@ class SortedListChallenge(BaseChallengeGenerator):
 
     def read_parameters(self):
         self.config_file.read_file()
-        self.parameters["nb_elements"] = self.config_file.get_int('sorted_list.nb_elements', 100)
+        self.parameters["nb_elements"] = self.config_file.get_int(
+            'sorted_list.nb_elements', 100)
         self.read_nonce_limit()
 
     def generate_solution(self, previous_hash, nonce):
@@ -33,5 +34,5 @@ class SortedListChallenge(BaseChallengeGenerator):
 
         hash = self.generate_hash(solution_string)
 
-        return Challenge(self.problem_name, nonce, solution_string, hash, self.parameters)
-
+        return Challenge(self.problem_name, nonce,
+                         solution_string, hash, self.parameters)

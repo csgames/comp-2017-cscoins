@@ -1,6 +1,6 @@
 #
 # CS Coins central server
-# 
+#
 import os
 import sys
 sys.path.append('..')

@@ -1,6 +1,7 @@
 from .BaseCommand import BaseCommand
 from caserver.CentralAuthorityServer import ClientConnection
 
+
 class CloseCommand(BaseCommand):
     def __init__(self, central_authority_server):
         BaseCommand.__init__(self, central_authority_server, 'close')
