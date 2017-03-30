@@ -16,6 +16,7 @@ from Crypto.PublicKey import RSA
 from Crypto.Hash import SHA256
 from Crypto import Random
 
+
 class ClientConnection:
     (Open, Closing, Closed) = (0, 1, 2)
 
@@ -56,7 +57,7 @@ class CentralAuthorityServer(object):
         self.challenge_thread = None
         self.max_requests_per_minutes = 30
         self.initial_cooldown_length = 60
-        self.invalid_submission_allowed = 5 # within 5 minutes
+        self.invalid_submission_allowed = 5  # within 5 minutes
         self.supervisor_key = ''
         self.emit_coins = False
 
@@ -64,7 +65,11 @@ class CentralAuthorityServer(object):
         self.submissions_allowed_ips = []
         self.statistic = ServerStatistic.ServerStatistic()
         self.read_vars_from_config()
-        self.database = ServerDatabase.ServerDatabase(self.config_file.get_string("db_user", "cacoins"), self.config_file.get_string("db_password", ""), self.config_file.get_string("db_name", "cacoins"))
+        self.database = ServerDatabase.ServerDatabase(
+            self.config_file.get_string(
+                "db_user", "cacoins"), self.config_file.get_string(
+                "db_password", ""), self.config_file.get_string(
+                "db_name", "cacoins"))
 
         # commands handler
         self.commands_handler = []
@@ -79,25 +84,36 @@ class CentralAuthorityServer(object):
     def read_vars_from_config(self):
         self.config_file.read_file()
         self.port = self.config_file.get_int('port', 8989)
-        self.listen_address = self.config_file.get_string('listen_address', 'localhost')
+        self.listen_address = self.config_file.get_string(
+            'listen_address', 'localhost')
         self.ssl_on = self.config_file.get_bool('ssl_on', True)
-        self.ssl_cert = self.config_file.get_string('ssl_cert', '../server.pem')
+        self.ssl_cert = self.config_file.get_string(
+            'ssl_cert', '../server.pem')
 
-        self.ca_name = self.config_file.get_string('ca_name', 'CS Games Coin Authority')
+        self.ca_name = self.config_file.get_string(
+            'ca_name', 'CS Games Coin Authority')
 
-        self.coins_per_challenge = self.config_file.get_decimal('coins_per_challenge', 10)
-        self.minutes_per_challenge = self.config_file.get_decimal('minutes_per_challenge', 15)
+        self.coins_per_challenge = self.config_file.get_decimal(
+            'coins_per_challenge', 10)
+        self.minutes_per_challenge = self.config_file.get_decimal(
+            'minutes_per_challenge', 15)
 
-        self.min_transaction_amount = self.config_file.get_decimal('min_transaction_amount', .00001)
-        self.available_challenges = self.config_file.get_string_tuple('available_challenges', ['sorted_list', 'reverse_sorted_list', 'shortest_path'])
+        self.min_transaction_amount = self.config_file.get_decimal(
+            'min_transaction_amount', .00001)
+        self.available_challenges = self.config_file.get_string_tuple(
+            'available_challenges', ['sorted_list', 'reverse_sorted_list', 'shortest_path'])
         self.prefix_length = self.config_file.get_int('prefix_length', 4)
-        self.max_requests_per_minutes = self.config_file.get_int('max_requests_per_minutes', 30)
-        self.initial_cooldown_length = self.config_file.get_int('initial_cooldown_length', 60)
-        self.invalid_submission_allowed = self.config_file.get_int('invalid_submission_allowed', 5)
+        self.max_requests_per_minutes = self.config_file.get_int(
+            'max_requests_per_minutes', 30)
+        self.initial_cooldown_length = self.config_file.get_int(
+            'initial_cooldown_length', 60)
+        self.invalid_submission_allowed = self.config_file.get_int(
+            'invalid_submission_allowed', 5)
         self.supervisor_key = self.config_file.get_string('supervisor_key', '')
         self.emit_coins = self.config_file.get_bool('emit_coins', True)
 
-        submissions_ips = self.config_file.get_string('submissions_allowed_ips', '')
+        submissions_ips = self.config_file.get_string(
+            'submissions_allowed_ips', '')
         submissions_allowed_ips = []
         if len(submissions_ips) > 0:
             ips = submissions_ips.split(',')
@@ -110,14 +126,14 @@ class CentralAuthorityServer(object):
 
     def fill_commands_handler(self):
         self.commands_handler.append(commands.GetCurrentChallengeCommand(self))
-        self.commands_handler.append(commands.GetChallengeSolutionCommand(self))
+        self.commands_handler.append(
+            commands.GetChallengeSolutionCommand(self))
         self.commands_handler.append(commands.RegisterWalletCommand(self))
         self.commands_handler.append(commands.SubmissionCommand(self))
         self.commands_handler.append(commands.GetTransactionsCommand(self))
         self.commands_handler.append(commands.CreateTransactionCommand(self))
         self.commands_handler.append(commands.CaServerInfoCommand(self))
         self.commands_handler.append(commands.CloseCommand(self))
-
 
     def is_ip_allowed_to_submit(self, remote_ip):
         if len(self.submissions_allowed_ips) == 0:
@@ -164,14 +180,16 @@ class CentralAuthorityServer(object):
                 await asyncio.sleep(0.2)
                 continue
 
-            #checking for cooldown
+            # checking for cooldown
             if self.database.is_client_on_cooldown(remote_addr[0]):
-                response = json.dumps({'error': '{0} is currently under a cooldown for request abuse.'.format(remote_addr[0])})
+                response = json.dumps(
+                    {'error': '{0} is currently under a cooldown for request abuse.'.format(remote_addr[0])})
                 await websocket.send(response)
                 continue
 
             command_obj = json.JSONDecoder().decode(message)
-            client_request = RequestControl.ClientRequest(remote_addr[0], message)
+            client_request = RequestControl.ClientRequest(
+                remote_addr[0], message)
             self.database.add_client_request(client_request)
 
             try:
@@ -181,28 +199,45 @@ class CentralAuthorityServer(object):
                 if command == 'close':
                     websocket.close()
                     client_connection.status = ClientConnection.Closed
-                    print("Connection closed ({0}:{1})".format(remote_addr[0], remote_addr[1]))
+                    print(
+                        "Connection closed ({0}:{1})".format(
+                            remote_addr[0], remote_addr[1]))
                     break
 
-                print("({0}:{1}) Executing command : {2}".format(remote_addr[0], remote_addr[1], command))
+                print(
+                    "({0}:{1}) Executing command : {2}".format(
+                        remote_addr[0],
+                        remote_addr[1],
+                        command))
 
-                request_count = self.database.get_client_request_count(remote_addr[0])
+                request_count = self.database.get_client_request_count(
+                    remote_addr[0])
 
                 if request_count <= self.max_requests_per_minutes:
                     try:
                         response = await self.execute_client_command(client_connection, command, args)
                     except Exception as e:
-                        print("Error during execute_client_command: {0}".format(e))
+                        print(
+                            "Error during execute_client_command: {0}".format(e))
                 else:
                     cooldown_length = self.initial_cooldown_length
-                    lastest_cooldown = self.database.get_client_latest_cooldown(remote_addr[0])
+                    lastest_cooldown = self.database.get_client_latest_cooldown(
+                        remote_addr[0])
                     if lastest_cooldown is not None:
                         cooldown_length = lastest_cooldown.length * 2
-                    print("Client {0} has been put on a cooldown for {1} minutes. (Too much requests per minutes)".format(remote_addr[0], int(cooldown_length/60)))
-                    client_cooldown = RequestControl.ClientCooldown(remote_addr[0], cooldown_length)
+                    print(
+                        "Client {0} has been put on a cooldown for {1} minutes. (Too much requests per minutes)".format(
+                            remote_addr[0], int(
+                                cooldown_length / 60)))
+                    client_cooldown = RequestControl.ClientCooldown(
+                        remote_addr[0], cooldown_length)
                     self.database.add_client_cooldown(client_cooldown)
 
-                    response = json.dumps({'error': 'Too much requests in one minute, you\'ve been put on cooldown for {0} minutes'.format(cooldown_length/60)})
+                    response = json.dumps(
+                        {
+                            'error': 'Too much requests in one minute, you\'ve been put on cooldown for {0} minutes'.format(
+                                cooldown_length /
+                                60)})
 
                 if client_connection.status == ClientConnection.Closing:
                     await websocket.close()
@@ -236,9 +271,13 @@ class CentralAuthorityServer(object):
                     wallet = self.database.get_wallet_by_id(wallet_id)
 
                     if wallet is not None:
-                        disqualification = RequestControl.ChallengeDisqualification(wallet.nid, current_challenge.id)
-                        self.database.add_challenge_disqualification(disqualification)
-                        print("Wallet {0} is disqualified for challenge {1}".format(wallet.id, current_challenge.id))
+                        disqualification = RequestControl.ChallengeDisqualification(
+                            wallet.nid, current_challenge.id)
+                        self.database.add_challenge_disqualification(
+                            disqualification)
+                        print(
+                            "Wallet {0} is disqualified for challenge {1}".format(
+                                wallet.id, current_challenge.id))
 
             except Exception as e:
                 print("Error in handle_supervisor : {0}".format(e))
@@ -248,7 +287,10 @@ class CentralAuthorityServer(object):
 
     async def handle_connection(self, websocket, path):
         remote_addr = websocket.remote_address
-        print("Accepting a connection from {0}:{1}".format(remote_addr[0], remote_addr[1]))
+        print(
+            "Accepting a connection from {0}:{1}".format(
+                remote_addr[0],
+                remote_addr[1]))
 
         try:
             if path == '/client':
@@ -258,7 +300,9 @@ class CentralAuthorityServer(object):
             else:
                 websocket.close()
         except Exception as e:
-            print("Error occurred with connection {0}:{1}, {2}".format(remote_addr[0], remote_addr[1], e))
+            print(
+                "Error occured with connection {0}:{1}, {2}".format(
+                    remote_addr[0], remote_addr[1], e))
 
     def push_message_to_miners(self, message):
         for c in self.clients:
@@ -266,7 +310,8 @@ class CentralAuthorityServer(object):
                 c.push_message(message)
 
     def initialize(self):
-        if not os.path.exists('ca_key.priv') and not os.path.exists('ca_key.pub'):
+        if not os.path.exists(
+                'ca_key.priv') and not os.path.exists('ca_key.pub'):
             print("Generating CA Key pair")
             prng = Random.new().read
 
@@ -394,9 +439,11 @@ class CentralAuthorityServer(object):
         if self.ssl_on:
             ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_SSLv23)
             ssl_context.load_cert_chain(self.ssl_cert)
-            self.server_socket = websockets.serve(self.handle_connection, self.listen_address, self.port, ssl=ssl_context)
+            self.server_socket = websockets.serve(
+                self.handle_connection, self.listen_address, self.port, ssl=ssl_context)
         else:
-            self.server_socket = websockets.serve(self.handle_connection, self.listen_address, self.port)
+            self.server_socket = websockets.serve(
+                self.handle_connection, self.listen_address, self.port)
 
         try:
             asyncio.get_event_loop().run_until_complete(self.server_socket)

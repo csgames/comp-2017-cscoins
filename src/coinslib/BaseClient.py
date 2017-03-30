@@ -66,7 +66,11 @@ class BaseClient:
 
     async def submit(self, nonce):
 
-        command = {'command': 'submission', 'args': {'nonce': nonce, 'wallet_id': self.wallet_id}}
+        command = {
+            'command': 'submission',
+            'args': {
+                'nonce': nonce,
+                'wallet_id': self.wallet_id}}
         message = json.dumps(command)
         await self.socket.send(message)
 
@@ -87,7 +91,8 @@ class BaseClient:
         return None
 
     async def get_challenge_solution(self, challenge_id):
-        command = {'command': 'get_challenge_solution', 'args': {'challenge_id': challenge_id}}
+        command = {'command': 'get_challenge_solution',
+                   'args': {'challenge_id': challenge_id}}
         message = json.dumps(command)
         await self.socket.send(message)
 
@@ -106,7 +111,11 @@ class BaseClient:
         return data
 
     async def get_transactions(self, start=0, count=100):
-        command = {'command': 'get_transactions', 'args': {'start': start, 'count': count}}
+        command = {
+            'command': 'get_transactions',
+            'args': {
+                'start': start,
+                'count': count}}
         message = json.dumps(command)
         await self.socket.send(message)
 
@@ -125,9 +134,19 @@ class BaseClient:
 
     async def create_transaction(self, recipient, amount):
         hasher = SHA256.new()
-        hasher.update("{0},{1},{2:.5f}".format(self.wallet_id, recipient, amount))
+        hasher.update(
+            "{0},{1},{2:.5f}".format(
+                self.wallet_id,
+                recipient,
+                amount))
         signature = self.sign_message(hasher)
-        command = {'command': 'create_transaction', 'args': {'source': self.wallet_id, 'recipient': recipient, 'amount': "{0:.5f}".format(amount), signature: signature}}
+        command = {
+            'command': 'create_transaction',
+            'args': {
+                'source': self.wallet_id,
+                'recipient': recipient,
+                'amount': "{0:.5f}".format(amount),
+                signature: signature}}
         message = json.dumps(command)
         await self.socket.send(message)
 
@@ -135,7 +154,9 @@ class BaseClient:
         response = json.loads(message)
 
         if 'error' in response:
-            print("Error during create_transaction : {0}".format(response['error']))
+            print(
+                "Error during create_transaction : {0}".format(
+                    response['error']))
 
         if 'id' in response:
             return response['id']
@@ -152,19 +173,25 @@ class BaseClient:
         hasher.update(self.public_key.exportKey(format='DER'))
         signature = self.sign_message(hasher)
 
-        command = {"command": "register_wallet", "args": {"name": self.wallet_name, "key": keyString, "signature": signature}}
+        command = {
+            "command": "register_wallet",
+            "args": {
+                "name": self.wallet_name,
+                "key": keyString,
+                "signature": signature}}
         message = json.dumps(command)
         await self.socket.send(message)
         message = await self.socket.recv()
         response = json.loads(message)
 
         if 'error' in response:
-            print("Error during register_wallet : {0}".format(response['error']))
+            print(
+                "Error during register_wallet : {0}".format(
+                    response['error']))
 
         if 'wallet_id' in response:
             print("Wallet created : {}".format(response["wallet_id"]))
             return
-
 
     async def get_ca_server_info(self):
         command = {"command": "ca_server_info", "args": {}}

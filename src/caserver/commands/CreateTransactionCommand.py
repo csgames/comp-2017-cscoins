@@ -6,9 +6,13 @@ from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
+
 class CreateTransactionCommand(BaseCommand):
     def __init__(self, central_authority_server):
-        BaseCommand.__init__(self, central_authority_server, 'create_transaction')
+        BaseCommand.__init__(
+            self,
+            central_authority_server,
+            'create_transaction')
         self.min_transaction_amount = self.central_authority_server.min_transaction_amount
         self.database = self.central_authority_server.database
 
@@ -18,11 +22,11 @@ class CreateTransactionCommand(BaseCommand):
             source = args['source']
             recipient = args['recipient']
             if ',' in args['amount']:
-                args['amount'] = args['amount'].replace(',','.')
+                args['amount'] = args['amount'].replace(',', '.')
 
             try:
                 amount = decimal.Decimal(args['amount'])
-            except:
+            except BaseException:
                 response["error"] = "Invalid amount, unable to parse"
                 return
 
@@ -35,7 +39,8 @@ class CreateTransactionCommand(BaseCommand):
                 # invalid source
                 remote_ip = client_connection.get_remote_ip()
                 response["error"] = "Source and/or recipient wallet invalid"
-                print("Invalid transaction (invalid source) tentative from ({0})".format(remote_ip))
+                print(
+                    "Invalid transaction (invalid source) tentative from ({0})".format(remote_ip))
                 return
 
             signer = PKCS1_v1_5.new(RSA.importKey(source_wallet.key))
@@ -53,20 +58,23 @@ class CreateTransactionCommand(BaseCommand):
                 # invalid recipient
                 remote_ip = client_connection.get_remote_ip()
                 response["error"] = "Source and/or recipient wallet invalid"
-                print("Invalid transaction (invalid recipient) tentative from ({0})".format(remote_ip))
+                print(
+                    "Invalid transaction (invalid recipient) tentative from ({0})".format(remote_ip))
                 return
 
             # amount is in balance or amount too low
             if source_wallet.balance < amount or amount < self.min_transaction_amount:
                 remote_ip = client_connection.get_remote_ip()
-                print("Invalid transaction (not enough funds) tentative from ({0})".format(remote_ip))
+                print(
+                    "Invalid transaction (not enough funds) tentative from ({0})".format(remote_ip))
                 response["error"] = "Not enough coins"
                 return
 
             # Just in case...
             if recipient_wallet.id == source_wallet.id:
                 remote_ip = client_connection.get_remote_ip()
-                print("Invalid transaction (same wallet) tentative from ({0})".format(remote_ip))
+                print(
+                    "Invalid transaction (same wallet) tentative from ({0})".format(remote_ip))
                 response["error"] = "Source and recipient are the same wallet"
                 return
 
@@ -76,7 +84,8 @@ class CreateTransactionCommand(BaseCommand):
             self.database.update_wallet_balance(source_wallet)
             self.database.update_wallet_balance(recipient_wallet)
 
-            txn = Transaction.Transaction(0, source_wallet.id, recipient_wallet.id, amount)
+            txn = Transaction.Transaction(
+                0, source_wallet.id, recipient_wallet.id, amount)
             txn.signature = signature
             self.database.create_transaction(txn)
             response['id'] = txn.id
@@ -85,4 +94,3 @@ class CreateTransactionCommand(BaseCommand):
             response["error"] = "Missing argument(s)"
         except Exception as e:
             print("{0} exception : {1}".format(self.__class__, e))
-

@@ -1,11 +1,12 @@
 import os
 import decimal
 
+
 class ConfigurationFile(object):
     def __init__(self, filename="ca_config.txt"):
         self.filename = filename
         self.vars = {}
-        
+
     def read_file(self):
         if not os.path.exists(self.filename):
             return
@@ -32,7 +33,7 @@ class ConfigurationFile(object):
     def get_int(self, var_name, default_value):
         try:
             return self.__get_int(var_name)
-        except:
+        except BaseException:
             return default_value
 
     def __get_int_tuple(self, var_name):
@@ -47,7 +48,7 @@ class ConfigurationFile(object):
     def get_int_tuple(self, var_name, default_value):
         try:
             return self.__get_int_tuple(var_name)
-        except:
+        except BaseException:
             return default_value
 
     def __get_string(self, var_name):
@@ -56,7 +57,7 @@ class ConfigurationFile(object):
     def get_string(self, var_name, default_value):
         try:
             return self.__get_string(var_name)
-        except:
+        except BaseException:
             return default_value
 
     def __get_float(self, var_name):
@@ -65,7 +66,7 @@ class ConfigurationFile(object):
     def get_float(self, var_name, default_value):
         try:
             return self.__get_float(var_name)
-        except:
+        except BaseException:
             return default_value
 
     def __get_decimal(self, var_name):
@@ -74,7 +75,7 @@ class ConfigurationFile(object):
     def get_decimal(self, var_name, default_value):
         try:
             return self.__get_decimal(var_name)
-        except:
+        except BaseException:
             return default_value
 
     def __get_bool(self, var_name):
@@ -86,7 +87,7 @@ class ConfigurationFile(object):
     def get_bool(self, var_name, default_value):
         try:
             return self.__get_bool(var_name)
-        except:
+        except BaseException:
             return default_value
 
     def __get_string_tuple(self, var_name, separator=','):
@@ -96,5 +97,5 @@ class ConfigurationFile(object):
     def get_string_tuple(self, var_name, default_value, separator=','):
         try:
             return self.__get_string_tuple(var_name, separator)
-        except:
+        except BaseException:
             return default_value

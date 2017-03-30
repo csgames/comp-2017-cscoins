@@ -27,7 +27,10 @@ class ChallengeSolver(threading.Thread):
         pass
 
     def run(self):
-        self.solution = self.solve(self.challenge.parameters, self.challenge.hash_prefix, self.challenge.last_solution_hash)
+        self.solution = self.solve(
+            self.challenge.parameters,
+            self.challenge.hash_prefix,
+            self.challenge.last_solution_hash)
         self.solution_found = True
 
 
@@ -59,7 +62,9 @@ class SortedListSolver(ChallengeSolver):
             solution_hash = sha256.hexdigest()
 
             if solution_hash.startswith(hash_prefix):
-                print("Solution found ! nonce:{0} hash:{1}".format(nonce, solution_hash))
+                print(
+                    "Solution found ! nonce:{0} hash:{1}".format(
+                        nonce, solution_hash))
                 return solution_hash, nonce
 
             nonce = random.randint(0, 99999999)
@@ -93,7 +98,9 @@ class ReverseSortedListSolver(ChallengeSolver):
             solution_hash = sha256.hexdigest()
 
             if solution_hash.startswith(hash_prefix):
-                print("Solution found ! nonce:{0} hash:{1}".format(nonce, solution_hash))
+                print(
+                    "Solution found ! nonce:{0} hash:{1}".format(
+                        nonce, solution_hash))
                 return solution_hash, nonce
 
             nonce = random.randint(0, 99999999)
@@ -122,26 +129,47 @@ class ShortestPathSolver(ChallengeSolver):
                     grid.walls.append((0, i))
                     grid.walls.append((grid_size - 1, i))
 
-            start_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
+            start_pos = (
+                self.mt.extract_number() %
+                grid_size,
+                self.mt.extract_number() %
+                grid_size)
             while start_pos in grid.walls:
-                start_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
+                start_pos = (
+                    self.mt.extract_number() %
+                    grid_size,
+                    self.mt.extract_number() %
+                    grid_size)
 
-            end_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
+            end_pos = (
+                self.mt.extract_number() %
+                grid_size,
+                self.mt.extract_number() %
+                grid_size)
             while end_pos in grid.walls or start_pos == end_pos:
-                end_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
+                end_pos = (
+                    self.mt.extract_number() %
+                    grid_size,
+                    self.mt.extract_number() %
+                    grid_size)
 
             # placing walls
             for i in range(nb_blockers):
                 # wall pos (row, col)
-                block_pos = (self.mt.extract_number() % grid_size, self.mt.extract_number() % grid_size)
+                block_pos = (
+                    self.mt.extract_number() %
+                    grid_size,
+                    self.mt.extract_number() %
+                    grid_size)
                 if block_pos != start_pos and block_pos != end_pos and block_pos not in grid.walls:
                     grid.walls.append(block_pos)
 
-            #trying to resolve the grid
+            # trying to resolve the grid
             path = []
             solution_string = ""
             try:
-                came_from, cost_so_far = Grid.dijkstra_search(grid, start_pos, end_pos)
+                came_from, cost_so_far = Grid.dijkstra_search(
+                    grid, start_pos, end_pos)
                 path = Grid.reconstruct_path(came_from, start_pos, end_pos)
 
                 for coord in path:
@@ -153,7 +181,9 @@ class ShortestPathSolver(ChallengeSolver):
                 solution_hash = sha256.hexdigest()
 
                 if solution_hash.startswith(hash_prefix):
-                    print("Solution found ! nonce:{0} hash:{1}".format(nonce, solution_hash))
+                    print(
+                        "Solution found ! nonce:{0} hash:{1}".format(
+                            nonce, solution_hash))
                     return solution_hash, nonce
 
             except Exception as e:

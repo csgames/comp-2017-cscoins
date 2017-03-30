@@ -2,6 +2,7 @@ def _int64(x):
     # Get the 64 least significant bits.
     return int(0xFFFFFFFFFFFFFFFF & x)
 
+
 class MT64:
     w = 64
     n = 312
@@ -24,13 +25,13 @@ class MT64:
         self.MT = [0] * MT64.n
         self.seed_mt(seed)
 
-
     def seed_mt(self, seed):
         self.index = MT64.n
         self.MT[0] = seed
 
         for i in range(1, MT64.n):
-            self.MT[i] = _int64(MT64.f * (self.MT[i - 1] ^ (self.MT[i - 1] >> (MT64.w - 2))) + i)
+            self.MT[i] = _int64(
+                MT64.f * (self.MT[i - 1] ^ (self.MT[i - 1] >> (MT64.w - 2))) + i)
 
     def extract_number(self):
         if self.index >= MT64.n:
@@ -50,7 +51,8 @@ class MT64:
 
     def twist(self):
         for i in range(MT64.n):
-            x = (self.MT[i] & MT64.upper_mask) + (self.MT[(i + 1) % MT64.n] & MT64.lower_mask)
+            x = (self.MT[i] & MT64.upper_mask) + \
+                (self.MT[(i + 1) % MT64.n] & MT64.lower_mask)
             xA = x >> 1
 
             if x % 2 != 0:

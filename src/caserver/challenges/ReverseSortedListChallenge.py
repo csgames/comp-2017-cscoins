@@ -7,12 +7,14 @@ import hashlib
 
 class ReverseSortedListChallenge(BaseChallengeGenerator):
     def __init__(self, config_file):
-        BaseChallengeGenerator.__init__(self, 'reverse_sorted_list', config_file)
+        BaseChallengeGenerator.__init__(
+            self, 'reverse_sorted_list', config_file)
         self.read_parameters()
 
     def read_parameters(self):
         self.config_file.read_file()
-        self.parameters["nb_elements"] = self.config_file.get_int('reverse_sorted_list.nb_elements', 100)
+        self.parameters["nb_elements"] = self.config_file.get_int(
+            'reverse_sorted_list.nb_elements', 100)
         self.read_nonce_limit()
 
     def generate_solution(self, previous_hash, nonce):
@@ -36,4 +38,5 @@ class ReverseSortedListChallenge(BaseChallengeGenerator):
 
         hash = self.generate_hash(solution_string)
 
-        return Challenge(self.problem_name, nonce, solution_string, hash, self.parameters)
+        return Challenge(self.problem_name, nonce,
+                         solution_string, hash, self.parameters)

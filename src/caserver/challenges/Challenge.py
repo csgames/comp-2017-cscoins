@@ -3,7 +3,8 @@ class Challenge:
     # Solution Status
     (NotSet, Created, InProgress, Ended) = (0, 1, 2, 3)
 
-    def __init__(self, challenge_name, nonce, solution_string, hash, parameters={}):
+    def __init__(self, challenge_name, nonce,
+                 solution_string, hash, parameters={}):
         self.challenge_name = challenge_name
         self.nonce = nonce
         self.solution_string = solution_string

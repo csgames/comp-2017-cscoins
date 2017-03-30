@@ -4,6 +4,7 @@ from Crypto.PublicKey import RSA
 from Crypto.Hash import SHA256
 from Crypto.Signature import PKCS1_v1_5
 
+
 class RegisterWalletCommand(BaseCommand):
     def __init__(self, central_authority_server):
         BaseCommand.__init__(self, central_authority_server, "register_wallet")
@@ -25,7 +26,8 @@ class RegisterWalletCommand(BaseCommand):
             existing_wallet = self.database.get_wallet_by_id(wallet_id)
 
             if existing_wallet is not None:
-                response["error"] = "Wallet {0} already registered".format(wallet_id)
+                response["error"] = "Wallet {0} already registered".format(
+                    wallet_id)
                 return
 
             # verifying the signature
